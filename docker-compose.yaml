@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  vllm-cpu-env:
+    build:
+      context: /home/ubuntu/vllm
+      dockerfile: Dockerfile.cpu
+      shm_size: "4g"
+    network_mode: "host"
