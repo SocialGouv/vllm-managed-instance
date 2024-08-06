@@ -24,7 +24,7 @@ runcmd:
   - su - ubuntu -c '
     cd /home/ubuntu &&
     git clone https://github.com/vllm-project/vllm.git &&
-    curl -O https://github.com/SocialGouv/vllm-managed-instance/blob/main/docker-compose.yaml &&
+    curl -O https://raw.githubusercontent.com/SocialGouv/vllm-managed-instance/main/docker-compose.yaml &&
     docker compose up -d --build
     '
 """
