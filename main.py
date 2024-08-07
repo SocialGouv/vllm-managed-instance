@@ -14,19 +14,29 @@ client = ovh.Client()
 serviceName = os.getenv("OVH_SERVICE_NAME")
 sshKeyId = os.getenv("OVH_SSH_KEY_ID")
 instanceName = "vllm-managed-instance"
-flavorId = "e81b46f8-1159-4e14-b0ba-cad655e6540b"  # b3-8
-imageId = "0192bfbe-952d-4c28-8264-4301cba17e56"  # Nvidia GPU Cloud
-region = "GRA11"
+flavorId = "906e8259-0340-4856-95b5-4ea2d26fe377"  # b2-7 GRA9
+imageId = "1988cbfb-1f17-4b08-9391-666462b216af"  # Nvidia GPU Cloud GRA9
+region = "GRA9"
 userData = """
 #cloud-config
 
+write_files:
+  - path: /home/ubuntu/init.sh
+    permissions: "0755"
+    content: |
+        #!/bin/bash 
+
+        set -Eeuo pipefail
+        cd /home/ubuntu
+        git clone https://github.com/vllm-project/vllm.git
+        curl -O https://raw.githubusercontent.com/SocialGouv/vllm-managed-instance/main/docker-compose.yaml
+        echo "HOST=$(curl -4 ifconfig.me)" >> .env
+        echo "TOKEN=$(openssl rand -base64 32)" >> .env
+        docker compose up -d --build
+        touch /tmp/runcmd_finished
+
 runcmd:
-  - su - ubuntu -c '
-    cd /home/ubuntu &&
-    git clone https://github.com/vllm-project/vllm.git &&
-    curl -O https://raw.githubusercontent.com/SocialGouv/vllm-managed-instance/main/docker-compose.yaml &&
-    docker compose up -d --build
-    '
+  - su - ubuntu -c '/home/ubuntu/init.sh > init.log 2>&1'
 """
 
 
@@ -46,7 +56,7 @@ if action == "create":
     if findInstance():
         print(f"Instance with name {instanceName} already exists")
         sys.exit(1)
-    response = client.post(
+    instanceResponse = client.post(
         f"/cloud/project/{serviceName}/instance",
         name=instanceName,
         sshKeyId=sshKeyId,
@@ -55,7 +65,8 @@ if action == "create":
         region=region,
         userData=userData,
     )
-    print(response)
+    print(instanceResponse)
+
 elif action == "delete":
     instanceId = findInstance()
     if not instanceId:
