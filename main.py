@@ -35,13 +35,11 @@ def findInstance():
     if not instances:
         print("Could not get available instances")
         sys.exit(1)
-    found = False
     for instance in instances:
         if not instance["name"] == instanceName:
             continue
         return instance["id"]
-    if not found:
-        return None
+    return None
 
 
 if action == "create":
