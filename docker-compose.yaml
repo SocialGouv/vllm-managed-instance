@@ -1,18 +1,13 @@
 services:
   vllm-cpu-env:
-    build:
-      context: /home/ubuntu/vllm
-      dockerfile: Dockerfile.cpu
-      shm_size: "4g"
+    image: ghcr.io/socialgouv/docker/vllm-cpu-env:latest
     expose:
       - "8000"
     labels:
       - "traefik.http.routers.vllm-cpu-env.rule=Host(`${HOST}.nip.io`)"
       - "traefik.http.routers.vllm-cpu-env.entrypoints=websecure"
       - "traefik.http.routers.vllm-cpu-env.tls.certresolver=myresolver"
-      - "traefik.http.middlewares.authheader.headers.customrequestheaders.Authorization=Bearer
-        ${TOKEN}"
-      - "traefik.http.routers.vllm-cpu-env.middlewares=authheader"
+      - "traefik.http.middlewares.test-auth.basicauth.users=${CREDENTIALS}"
 
   reverse-proxy:
     image: traefik:v2.4

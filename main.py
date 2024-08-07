@@ -20,6 +20,9 @@ region = "GRA9"
 userData = """
 #cloud-config
 
+packages:
+  - apache2-utils
+
 write_files:
   - path: /home/ubuntu/init.sh
     permissions: "0755"
@@ -28,10 +31,11 @@ write_files:
 
         set -Eeuo pipefail
         cd /home/ubuntu
-        git clone https://github.com/vllm-project/vllm.git
         curl -O https://raw.githubusercontent.com/SocialGouv/vllm-managed-instance/main/docker-compose.yaml
         echo "HOST=$(curl -4 ifconfig.me)" >> .env
-        echo "TOKEN=$(openssl rand -base64 32)" >> .env
+        export TOKEN=$(openssl rand -base64 32)
+        echo "TOKEN=${TOKEN}" >> .env
+        echo "CREDENTIALS=$(htpasswd -nBb user ${TOKEN})" >> .env
         docker compose up -d --build
         touch /tmp/runcmd_finished
 
