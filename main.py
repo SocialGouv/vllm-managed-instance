@@ -7,6 +7,7 @@ import ovh
 from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, stream=sys.stderr)
 
 
 def getRequiredEnv(key):
@@ -154,5 +155,6 @@ elif action == "delete":
         logger.error(f"Could not find instance with name {instanceName}")
         sys.exit(1)
     client.delete(f"/cloud/project/{serviceName}/instance/{instanceId}")
+    logger.info("Deleted instance")
 else:
     logger.error("Invalid action. Use 'create' or 'delete'.")
