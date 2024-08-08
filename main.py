@@ -1,6 +1,7 @@
 import ovh
 import os
 import sys
+import time
 from dotenv import load_dotenv
 
 
@@ -66,11 +67,37 @@ def findInstance():
     return None
 
 
+def findIpInInstance(response):
+    if not response or "ipAddresses" not in response or not response["ipAddresses"]:
+        print("Error looking for IPv4 in API response", response)
+        return None
+    for ip in response["ipAddresses"]:
+        if (
+            ip
+            and "version" in ip
+            and ip["version"] == 4
+            and "type" in ip
+            and ip["type"] == "public"
+            and "ip" in ip
+            and ip["ip"]
+        ):
+            return ip["ip"]
+    print("Error looking for IPv4 in API response", response)
+    return None
+
+
+def findStatusInInstance(response):
+    if not response or "status" not in response or not response["status"]:
+        print("Error looking for status in API response", response)
+        return None
+    return response["status"]
+
+
 if action == "create":
     if findInstance():
         print(f"Instance with name {instanceName} already exists")
         sys.exit(1)
-    instanceResponse = client.post(
+    createResponse = client.post(
         f"/cloud/project/{serviceName}/instance",
         name=instanceName,
         sshKeyId=sshKeyId,
@@ -79,7 +106,37 @@ if action == "create":
         region=region,
         userData=userData,
     )
-    print("Created instance", instanceResponse)
+    if not createResponse or "id" not in createResponse:
+        print("Error creating instance", createResponse)
+        sys.exit(1)
+    else:
+        print("Created instance", createResponse)
+
+    # waiting for instance to be ready
+    instanceResponse = client.get(
+        f"/cloud/project/{serviceName}/instance/{createResponse['id']}"
+    )
+    while findStatusInInstance(instanceResponse) == "BUILD":
+        print("Instance is building...")
+        instanceResponse = client.get(
+            f"/cloud/project/{serviceName}/instance/{createResponse['id']}"
+        )
+        time.sleep(3)
+
+    if findStatusInInstance(instanceResponse) != "ACTIVE":
+        print(
+            "Error creating instance on OVH, status:",
+            findStatusInInstance(instanceResponse),
+        )
+        sys.exit(1)
+
+    print("Instance is ready")
+    ip = findIpInInstance(instanceResponse)
+    if not ip:
+        print("Error finding IP in instance response")
+        sys.exit(1)
+    print(f"Instance domain: {ip}.nip.io")
+
 
 elif action == "delete":
     instanceId = findInstance()
