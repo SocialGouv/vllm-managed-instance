@@ -9,6 +9,7 @@ def getRequiredEnv(key):
     if not value:
         print(f"Env var {key} required but not defined")
         sys.exit(1)
+    return value
 
 
 if len(sys.argv) != 2:
