@@ -19,7 +19,13 @@ if len(sys.argv) != 2:
 
 action = sys.argv[1].lower()
 load_dotenv()
-client = ovh.Client()
+
+client = ovh.Client(
+    endpoint=getRequiredEnv("OVH_ENDPOINT"),
+    application_key=getRequiredEnv("OVH_APPLICATION_KEY"),
+    application_secret=getRequiredEnv("OVH_APPLICATION_SECRET"),
+    consumer_key=getRequiredEnv("OVH_CONSUMER_KEY"),
+)
 
 instanceName = "vllm-managed-instance"
 serviceName = getRequiredEnv("OVH_SERVICE_NAME")

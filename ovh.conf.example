@@ -1,7 +1,0 @@
-[default]
-endpoint=ovh-eu
-
-[ovh-eu]
-application_key=
-application_secret=
-consumer_key=
