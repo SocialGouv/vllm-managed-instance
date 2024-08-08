@@ -1,20 +1,24 @@
-import ovh
 import os
 import sys
 import time
+import logging
+
+import ovh
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 
 def getRequiredEnv(key):
     value = os.getenv(key)
     if not value:
-        print(f"Env var {key} required but not defined")
+        logger.error(f"Env var {key} required but not defined")
         sys.exit(1)
     return value
 
 
 if len(sys.argv) != 2:
-    print("Usage: python script.py <create|delete>")
+    logger.error("Usage: python script.py <create|delete>")
     sys.exit(1)
 
 action = sys.argv[1].lower()
@@ -64,7 +68,7 @@ runcmd:
 def findInstance():
     instances = client.get(f"/cloud/project/{serviceName}/instance")
     if not instances:
-        print("Could not get available instances")
+        logger.error("Could not get available instances")
         sys.exit(1)
     for instance in instances:
         if not instance["name"] == instanceName:
@@ -75,7 +79,7 @@ def findInstance():
 
 def findIpInInstance(response):
     if not response or "ipAddresses" not in response or not response["ipAddresses"]:
-        print("Error looking for IPv4 in API response", response)
+        logger.error("Error looking for IPv4 in API response", response)
         return None
     for ip in response["ipAddresses"]:
         if (
@@ -88,20 +92,20 @@ def findIpInInstance(response):
             and ip["ip"]
         ):
             return ip["ip"]
-    print("Error looking for IPv4 in API response", response)
+    logger.error("Error looking for IPv4 in API response", response)
     return None
 
 
 def findStatusInInstance(response):
     if not response or "status" not in response or not response["status"]:
-        print("Error looking for status in API response", response)
+        logger.error("Error looking for status in API response", response)
         return None
     return response["status"]
 
 
 if action == "create":
     if findInstance():
-        print(f"Instance with name {instanceName} already exists")
+        logger.error(f"Instance with name {instanceName} already exists")
         sys.exit(1)
     createResponse = client.post(
         f"/cloud/project/{serviceName}/instance",
@@ -113,42 +117,42 @@ if action == "create":
         userData=userData,
     )
     if not createResponse or "id" not in createResponse:
-        print("Error creating instance", createResponse)
+        logger.error("Error creating instance", createResponse)
         sys.exit(1)
     else:
-        print("Created instance", createResponse)
+        logger.info("Created instance", createResponse)
 
     # waiting for instance to be ready
     instanceResponse = client.get(
         f"/cloud/project/{serviceName}/instance/{createResponse['id']}"
     )
     while findStatusInInstance(instanceResponse) == "BUILD":
-        print("Instance is building...")
+        logger.info("Instance is building...")
         instanceResponse = client.get(
             f"/cloud/project/{serviceName}/instance/{createResponse['id']}"
         )
         time.sleep(3)
 
     if findStatusInInstance(instanceResponse) != "ACTIVE":
-        print(
+        logger.error(
             "Error creating instance on OVH, status:",
             findStatusInInstance(instanceResponse),
         )
         sys.exit(1)
 
-    print("Instance is ready")
+    logger.info("Instance is ready")
     ip = findIpInInstance(instanceResponse)
     if not ip:
-        print("Error finding IP in instance response")
+        logger.error("Error finding IP in instance response")
         sys.exit(1)
-    print(f"Instance domain: {ip}.nip.io")
+    logger.info(f"Instance domain: {ip}.nip.io")
 
 
 elif action == "delete":
     instanceId = findInstance()
     if not instanceId:
-        print(f"Could not find instance with name {instanceName}")
+        logger.error(f"Could not find instance with name {instanceName}")
         sys.exit(1)
     client.delete(f"/cloud/project/{serviceName}/instance/{instanceId}")
 else:
-    print("Invalid action. Use 'create' or 'delete'.")
+    logger.error("Invalid action. Use 'create' or 'delete'.")
