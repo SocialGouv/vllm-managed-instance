@@ -3,6 +3,14 @@ import os
 import sys
 from dotenv import load_dotenv
 
+
+def getRequiredEnv(key):
+    value = os.getenv(key)
+    if not value:
+        print(f"Env var {key} required but not defined")
+        sys.exit(1)
+
+
 if len(sys.argv) != 2:
     print("Usage: python script.py <create|delete>")
     sys.exit(1)
@@ -11,13 +19,14 @@ action = sys.argv[1].lower()
 load_dotenv()
 client = ovh.Client()
 
-serviceName = os.getenv("OVH_SERVICE_NAME")
-sshKeyId = os.getenv("OVH_SSH_KEY_ID")
 instanceName = "vllm-managed-instance"
-flavorId = "906e8259-0340-4856-95b5-4ea2d26fe377"  # b2-7 GRA9
-imageId = "1988cbfb-1f17-4b08-9391-666462b216af"  # Nvidia GPU Cloud GRA9
-region = "GRA9"
-userData = """
+serviceName = getRequiredEnv("OVH_SERVICE_NAME")
+sshKeyId = getRequiredEnv("OVH_SSH_KEY_ID")
+flavorId = getRequiredEnv("OVH_INSTANCE_FLAVOR_ID")
+imageId = getRequiredEnv("OVH_INSTANCE_IMAGE_ID")
+region = getRequiredEnv("OVH_REGION")
+authToken = getRequiredEnv("AUTH_TOKEN")
+userData = f"""
 #cloud-config
 
 packages:
@@ -35,9 +44,7 @@ write_files:
         cd /home/ubuntu
         curl -O https://raw.githubusercontent.com/SocialGouv/vllm-managed-instance/main/docker-compose.yaml
         echo "HOST=$(curl -4 ifconfig.me)" >> .env
-        export TOKEN=$(pwgen 32 1)
-        echo "TOKEN='${TOKEN}'" >> .env
-        echo "CREDENTIALS='$(htpasswd -nBb user ${TOKEN})'" >> .env
+        echo "CREDENTIALS='$(htpasswd -nBb user {authToken})'" >> .env
         docker compose up -d --build
         touch /tmp/runcmd_finished
 
@@ -71,7 +78,7 @@ if action == "create":
         region=region,
         userData=userData,
     )
-    print(instanceResponse)
+    print("Created instance", instanceResponse)
 
 elif action == "delete":
     instanceId = findInstance()
