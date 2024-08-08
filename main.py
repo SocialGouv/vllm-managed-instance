@@ -22,6 +22,7 @@ userData = """
 
 packages:
   - apache2-utils
+  - pwgen
 
 write_files:
   - path: /home/ubuntu/init.sh
@@ -33,7 +34,7 @@ write_files:
         cd /home/ubuntu
         curl -O https://raw.githubusercontent.com/SocialGouv/vllm-managed-instance/main/docker-compose.yaml
         echo "HOST=$(curl -4 ifconfig.me)" >> .env
-        export TOKEN=$(openssl rand -base64 32)
+        export TOKEN=$(pwgen 32 1)
         echo "TOKEN=${TOKEN}" >> .env
         echo "CREDENTIALS=$(htpasswd -nBb user ${TOKEN})" >> .env
         docker compose up -d --build

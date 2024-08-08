@@ -7,7 +7,8 @@ services:
       - "traefik.http.routers.vllm-cpu-env.rule=Host(`${HOST}.nip.io`)"
       - "traefik.http.routers.vllm-cpu-env.entrypoints=websecure"
       - "traefik.http.routers.vllm-cpu-env.tls.certresolver=myresolver"
-      - "traefik.http.middlewares.main-auth.basicauth.users=${CREDENTIALS}"
+      # - "traefik.http.middlewares.main-auth.basicauth.users=${CREDENTIALS}"
+      - "traefik.http.middlewares.main-auth.plugin.traefik-api-key-middleware.keys=${TOKEN}"
       - "traefik.http.routers.vllm-cpu-env.middlewares=main-auth@docker"
 
   reverse-proxy:
@@ -21,6 +22,8 @@ services:
       - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.myresolver.acme.email=socialgroovybot@fabrique.social.gouv.fr"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--experimental.plugins.traefik-api-key-middleware.modulename=github.com/dtomlinson91/traefik-api-key-middleware"
+      - "--experimental.plugins.traefik-api-key-middleware.version=v0.1.2"
     ports:
       - "80:80"
       - "443:443"
