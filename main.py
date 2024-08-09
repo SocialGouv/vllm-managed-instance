@@ -181,6 +181,7 @@ if action == "create":
         attempt += 1
     else:
         logger.info("URL is not ready after maximum attempts.")
+        sys.exit(1)
 
 
 
