@@ -1,5 +1,5 @@
 services:
-  vllm-cpu-env:
+  vllm-service:
     image: vllm/vllm-openai:latest
     environment:
       HUGGING_FACE_HUB_TOKEN: "${HUGGING_FACE_HUB_TOKEN}"
@@ -10,11 +10,11 @@ services:
     expose:
       - "8000"
     labels:
-      - "traefik.http.routers.vllm-cpu-env.rule=Host(`${HOST}.nip.io`)"
-      - "traefik.http.routers.vllm-cpu-env.entrypoints=websecure"
-      - "traefik.http.routers.vllm-cpu-env.tls.certresolver=myresolver"
+      - "traefik.http.routers.vllm-service.rule=Host(`${HOST}.nip.io`)"
+      - "traefik.http.routers.vllm-service.entrypoints=websecure"
+      - "traefik.http.routers.vllm-service.tls.certresolver=myresolver"
       - "traefik.http.middlewares.main-auth.basicauth.users=${CREDENTIALS}"
-      - "traefik.http.routers.vllm-cpu-env.middlewares=main-auth@docker"
+      - "traefik.http.routers.vllm-service.middlewares=main-auth@docker"
     runtime: nvidia  # Set the desired runtime for GPU support
     ipc: host  # Set the IPC namespace to host
     deploy:
