@@ -17,6 +17,9 @@ def getRequiredEnv(key):
         sys.exit(1)
     return value
 
+def indentString(input_string, indent_level=4):
+    indent = ' ' * indent_level
+    return '\n'.join(indent + line for line in input_string.splitlines())
 
 if len(sys.argv) != 2:
     logger.error("Usage: python script.py <create|delete>")
@@ -39,6 +42,11 @@ flavorId = getRequiredEnv("OVH_INSTANCE_FLAVOR_ID")
 imageId = getRequiredEnv("OVH_INSTANCE_IMAGE_ID")
 region = getRequiredEnv("OVH_REGION")
 authToken = getRequiredEnv("AUTH_TOKEN")
+huggingFaceHubToken = getRequiredEnv("HUGGING_FACE_HUB_TOKEN")
+
+f = open("docker-compose.yaml", "r")
+dockerCompose = indentString(f.read(), 8)
+
 userData = f"""
 #cloud-config
 
@@ -55,16 +63,18 @@ write_files:
 
         set -Eeuo pipefail
         cd /home/ubuntu
-        curl -O https://raw.githubusercontent.com/SocialGouv/vllm-managed-instance/main/docker-compose.yaml
+        cat <<'EOF' > docker-compose.yaml
+{dockerCompose}
+        EOF
         echo "HOST=$(curl -4 ifconfig.me)" >> .env
         echo "CREDENTIALS='$(htpasswd -nBb user {authToken})'" >> .env
+        echo "HUGGING_FACE_HUB_TOKEN='{huggingFaceHubToken}'" >> .env
         docker compose up -d --build
         touch /tmp/runcmd_finished
 
 runcmd:
   - su - ubuntu -c '/home/ubuntu/init.sh > init.log 2>&1'
 """
-
 
 def findInstance():
     instances = client.get(f"/cloud/project/{serviceName}/instance")

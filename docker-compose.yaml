@@ -1,6 +1,12 @@
 services:
   vllm-cpu-env:
-    image: ghcr.io/socialgouv/docker/vllm-cpu-env:latest
+    image: vllm/vllm-openai:latest
+    environment:
+      HUGGING_FACE_HUB_TOKEN: "${HUGGING_FACE_HUB_TOKEN}"
+    command:
+      - "--model=mistralai/Mistral-7B-v0.1"
+      - "--tensor-parallel-size=4"
+      - "--dtype=half" # https://github.com/vllm-project/vllm/issues/1157
     expose:
       - "8000"
     labels:
@@ -9,6 +15,15 @@ services:
       - "traefik.http.routers.vllm-cpu-env.tls.certresolver=myresolver"
       - "traefik.http.middlewares.main-auth.basicauth.users=${CREDENTIALS}"
       - "traefik.http.routers.vllm-cpu-env.middlewares=main-auth@docker"
+    runtime: nvidia  # Set the desired runtime for GPU support
+    ipc: host  # Set the IPC namespace to host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
   reverse-proxy:
     image: traefik:v2.4
