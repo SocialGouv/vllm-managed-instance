@@ -56,6 +56,7 @@ packages:
   - apache2-utils
   - pwgen
   - micro
+  - bpytop
 
 write_files:
   - path: /home/ubuntu/init.sh
