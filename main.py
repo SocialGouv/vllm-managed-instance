@@ -168,7 +168,7 @@ if action == "create":
     while attempt <= max_attempts:
         try:
             response = requests.get(url)
-            if response.status_code == 200:
+            if response.status_code == 401:
                 logger.info(f"URL {url} is ready.")
                 break
         except requests.ConnectionError:
