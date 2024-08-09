@@ -6,7 +6,7 @@ on:
       model:
         description: 'Model name to deploy'
         required: true
-        default: 'mistralai/Mistral-7B-v0.1'
+        default: 'neuralmagic/Meta-Llama-3.1-70B-Instruct-quantized.w8a16'
       instanceNameSuffix:
         description: 'Instance name suffix'
         required: false
