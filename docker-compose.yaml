@@ -26,6 +26,12 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+    healthcheck:
+      test: curl --fail http://localhost:8000/ || exit 1
+      interval: 10s
+      timeout: 30s
+      retries: 60
+      start_period: 60s
 
   reverse-proxy:
     image: traefik:v2.4
@@ -44,3 +50,14 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "./letsencrypt:/letsencrypt"
+
+  autoheal:
+    image: willfarrell/autoheal:latest
+    tty: true
+    restart: always
+    environment:
+      - AUTOHEAL_INTERVAL=60
+      - AUTOHEAL_START_PERIOD=300
+      - AUTOHEAL_DEFAULT_STOP_TIMEOUT=10
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
