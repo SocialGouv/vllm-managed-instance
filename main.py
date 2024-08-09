@@ -42,7 +42,7 @@ flavorId = getRequiredEnv("OVH_INSTANCE_FLAVOR_ID")
 imageId = getRequiredEnv("OVH_INSTANCE_IMAGE_ID")
 region = getRequiredEnv("OVH_REGION")
 authToken = getRequiredEnv("AUTH_TOKEN")
-huggingFaceHubToken = getRequiredEnv("HUGGING_FACE_HUB_TOKEN")
+huggingFaceHubToken = os.getenv("HUGGING_FACE_HUB_TOKEN")
 
 f = open("docker-compose.yaml", "r")
 dockerCompose = indentString(f.read(), 8)
