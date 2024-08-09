@@ -43,6 +43,7 @@ imageId = getRequiredEnv("OVH_INSTANCE_IMAGE_ID")
 region = getRequiredEnv("OVH_REGION")
 authToken = getRequiredEnv("AUTH_TOKEN")
 huggingFaceHubToken = os.getenv("HUGGING_FACE_HUB_TOKEN")
+model = os.getenv("MODEL")
 
 f = open("docker-compose.yaml", "r")
 dockerCompose = indentString(f.read(), 8)
@@ -69,6 +70,7 @@ write_files:
         echo "HOST=$(curl -4 ifconfig.me)" >> .env
         echo "CREDENTIALS='$(htpasswd -nBb user {authToken})'" >> .env
         echo "HUGGING_FACE_HUB_TOKEN='{huggingFaceHubToken}'" >> .env
+        echo "MODEL='{model}'" >> .env
         docker compose up -d --build
         touch /tmp/runcmd_finished
 
