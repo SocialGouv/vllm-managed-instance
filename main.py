@@ -161,7 +161,7 @@ if action == "create":
         sys.exit(1)
     logger.info(f"Instance domain: {ip}.nip.io")
 
-    url = f"https://{ip}.nip.io"
+    url = f"https://{ip}.nip.io/v1/models"
     max_attempts = 120
     wait_time = 5
     attempt = 1
