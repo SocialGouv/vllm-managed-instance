@@ -2,6 +2,11 @@ name: Create instance
 
 on:
   workflow_dispatch:
+    inputs:
+      model:
+        description: 'Model name to deploy'
+        required: true
+        default: 'mistralai/Mistral-7B-v0.1'
 
 jobs:
   create-instance:
