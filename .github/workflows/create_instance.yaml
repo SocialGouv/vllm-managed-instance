@@ -40,3 +40,5 @@ jobs:
           OVH_SERVICE_NAME: ${{ secrets.OVH_SERVICE_NAME }}
           AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
           HUGGING_FACE_HUB_TOKEN: ${{ secrets.HUGGING_FACE_HUB_TOKEN }}
+
+          MODEL: ${{ inputs.model }}
