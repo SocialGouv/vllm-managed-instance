@@ -45,6 +45,7 @@ region = getRequiredEnv("OVH_REGION")
 authToken = getRequiredEnv("AUTH_TOKEN")
 huggingFaceHubToken = os.getenv("HUGGING_FACE_HUB_TOKEN")
 model = os.getenv("MODEL")
+extraUsers = os.getenv("EXTRA_USERS")
 
 f = open("docker-compose.yaml", "r")
 dockerCompose = indentString(f.read(), 8)
@@ -78,6 +79,9 @@ write_files:
 
 runcmd:
   - su - ubuntu -c '/home/ubuntu/init.sh > init.log 2>&1'
+
+users:
+{extraUsers}
 """
 
 def findInstance():
