@@ -36,7 +36,11 @@ client = ovh.Client(
     consumer_key=getRequiredEnv("OVH_CONSUMER_KEY"),
 )
 
-instanceName = "vllm-managed-instance"
+instanceNameSuffix = os.getenv("INSTANCE_NAME_SUFFIX")
+if (instanceNameSuffix):
+    instanceNameSuffix = f"-{instanceNameSuffix}"
+
+instanceName = "vllm-managed-instance" + instanceNameSuffix
 serviceName = getRequiredEnv("OVH_SERVICE_NAME")
 sshKeyId = getRequiredEnv("OVH_SSH_KEY_ID")
 flavorId = getRequiredEnv("OVH_INSTANCE_FLAVOR_ID")

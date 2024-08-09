@@ -7,6 +7,10 @@ on:
         description: 'Model name to deploy'
         required: true
         default: 'mistralai/Mistral-7B-v0.1'
+      instanceNameSuffix:
+        description: 'Instance name suffix'
+        required: false
+        default: ''
 
 jobs:
   create-instance:
@@ -44,3 +48,4 @@ jobs:
           HUGGING_FACE_HUB_TOKEN: ${{ secrets.HUGGING_FACE_HUB_TOKEN }}
 
           MODEL: ${{ inputs.model }}
+          INSTANCE_NAME_SUFFIX: ${{ inputs.instanceNameSuffix }}
