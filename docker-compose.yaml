@@ -1,5 +1,6 @@
 services:
   vllm-service:
+    restart: always
     image: vllm/vllm-openai:latest
     environment:
       HUGGING_FACE_HUB_TOKEN: "${HUGGING_FACE_HUB_TOKEN}"
