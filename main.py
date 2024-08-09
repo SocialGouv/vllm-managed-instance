@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import logging
+import requests
 
 import ovh
 from dotenv import load_dotenv
@@ -159,6 +160,28 @@ if action == "create":
         logger.error("Error finding IP in instance response")
         sys.exit(1)
     logger.info(f"Instance domain: {ip}.nip.io")
+
+    url = f"https://{ip}.nip.io"
+    max_attempts = 120
+    wait_time = 5
+    attempt = 1
+    while attempt <= max_attempts:
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                print(f"URL {url} is ready.")
+                break
+        except requests.ConnectionError:
+            # If there's a connection error, ignore and try again
+            pass
+
+        # If the response code is not 200, wait and try again
+        print(f"Attempt {attempt}/{max_attempts}: URL not ready (HTTP status code: {response.status_code if 'response' in locals() else 'Connection error'}). Waiting {wait_time} seconds...")
+        time.sleep(wait_time)
+        attempt += 1
+    else:
+        print("URL is not ready after maximum attempts.")
+
 
 
 elif action == "delete":
