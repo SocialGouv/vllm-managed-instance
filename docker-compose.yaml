@@ -6,7 +6,7 @@ services:
     command:
       - "--model=${MODEL:-mistralai/Mistral-7B-v0.1}"
       - "--tensor-parallel-size=4"
-      - "--max-parallel-loading-workers=1"
+      # - "--max-parallel-loading-workers=1"
       - "--dtype=half" # https://github.com/vllm-project/vllm/issues/1157
     expose:
       - "8000"
