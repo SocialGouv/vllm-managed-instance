@@ -2,6 +2,11 @@ name: Delete instance
 
 on:
   workflow_dispatch:
+    inputs:
+      instanceNameSuffix:
+        description: 'Instance name suffix'
+        required: false
+        default: ''
   schedule:
     - cron: "0 0 * * *"
 
@@ -36,3 +41,5 @@ jobs:
           OVH_SSH_KEY_ID: ${{ secrets.OVH_SSH_KEY_ID }}
           OVH_SERVICE_NAME: ${{ secrets.OVH_SERVICE_NAME }}
           AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
+
+          INSTANCE_NAME_SUFFIX: ${{ inputs.instanceNameSuffix }}
