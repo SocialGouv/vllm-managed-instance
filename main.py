@@ -169,18 +169,18 @@ if action == "create":
         try:
             response = requests.get(url)
             if response.status_code == 200:
-                print(f"URL {url} is ready.")
+                logger.info(f"URL {url} is ready.")
                 break
         except requests.ConnectionError:
             # If there's a connection error, ignore and try again
             pass
 
         # If the response code is not 200, wait and try again
-        print(f"Attempt {attempt}/{max_attempts}: URL not ready (HTTP status code: {response.status_code if 'response' in locals() else 'Connection error'}). Waiting {wait_time} seconds...")
+        logger.info(f"Attempt {attempt}/{max_attempts}: URL not ready (HTTP status code: {response.status_code if 'response' in locals() else 'Connection error'}). Waiting {wait_time} seconds...")
         time.sleep(wait_time)
         attempt += 1
     else:
-        print("URL is not ready after maximum attempts.")
+        logger.info("URL is not ready after maximum attempts.")
 
 
 
