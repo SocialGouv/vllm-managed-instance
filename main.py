@@ -72,6 +72,7 @@ packages:
   - micro
   - bpytop
   - python3-poetry
+  - jq
 
 write_files:
   - path: /home/ubuntu/.ssh/id_ed25519
