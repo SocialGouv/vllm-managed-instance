@@ -11,6 +11,8 @@ services:
       - "--dtype=half" # https://github.com/vllm-project/vllm/issues/1157
     expose:
       - "8000"
+    ports:
+      - "127.0.0.1:8000:8000"
     labels:
       - "traefik.http.routers.vllm-service.rule=Host(`${HOST}.nip.io`)"
       - "traefik.http.routers.vllm-service.entrypoints=websecure"
