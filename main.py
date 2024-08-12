@@ -71,6 +71,7 @@ packages:
   - pwgen
   - micro
   - bpytop
+  - python3-poetry
 
 write_files:
   - path: /home/ubuntu/.ssh/id_ed25519
