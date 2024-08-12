@@ -36,7 +36,7 @@ client = ovh.Client(
     consumer_key=getRequiredEnv("OVH_CONSUMER_KEY"),
 )
 
-instanceNameSuffix = os.getenv("INSTANCE_NAME_SUFFIX")
+instanceNameSuffix = os.getenv("INSTANCE_NAME_SUFFIX", "")
 if (instanceNameSuffix):
     instanceNameSuffix = f"-{instanceNameSuffix}"
 
@@ -48,8 +48,8 @@ imageId = getRequiredEnv("OVH_INSTANCE_IMAGE_ID")
 region = getRequiredEnv("OVH_REGION")
 authToken = getRequiredEnv("AUTH_TOKEN")
 huggingFaceHubToken = os.getenv("HUGGING_FACE_HUB_TOKEN")
-model = os.getenv("MODEL")
-users = os.getenv("USERS")
+model = os.getenv("MODEL", "")
+users = os.getenv("USERS", "")
 
 if users:
   users = f"""
