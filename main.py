@@ -50,6 +50,9 @@ authToken = getRequiredEnv("AUTH_TOKEN")
 huggingFaceHubToken = os.getenv("HUGGING_FACE_HUB_TOKEN")
 model = os.getenv("MODEL", "")
 users = os.getenv("USERS", "")
+gitPrivateDeployKey = os.getenv("GIT_PRIVATE_DEPLOY_KEY", "")
+
+gitPrivateDeployKey = indentString(gitPrivateDeployKey, 8)
 
 if users:
   users = f"""
@@ -70,6 +73,10 @@ packages:
   - bpytop
 
 write_files:
+  - path: /home/ubuntu/.ssh/
+    permissions: "0600"
+    content: |
+{gitPrivateDeployKey}
   - path: /home/ubuntu/init.sh
     permissions: "0755"
     content: |
