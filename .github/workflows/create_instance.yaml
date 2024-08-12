@@ -37,7 +37,7 @@ jobs:
           OVH_INSTANCE_IMAGE_ID: ${{ vars.OVH_INSTANCE_IMAGE_ID }}
           OVH_REGION: ${{ vars.OVH_REGION }}
           
-          EXTRA_USERS: ${{ vars.EXTRA_USERS }}
+          USERS: ${{ vars.USERS }}
 
           OVH_APPLICATION_KEY: ${{ secrets.OVH_APPLICATION_KEY }}
           OVH_APPLICATION_SECRET: ${{ secrets.OVH_APPLICATION_SECRET }}
