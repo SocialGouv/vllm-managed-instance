@@ -87,6 +87,7 @@ write_files:
         cat <<'EOF' > docker-compose.yaml
 {dockerCompose}
         EOF
+        echo "TOKEN={authToken}" >> .env
         echo "HOST=$(curl -4 ifconfig.me)" >> .env
         echo "CREDENTIALS='$(htpasswd -nBb user {authToken})'" >> .env
         echo "HUGGING_FACE_HUB_TOKEN='{huggingFaceHubToken}'" >> .env
