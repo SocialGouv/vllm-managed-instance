@@ -77,6 +77,7 @@ packages:
 write_files:
   - path: /home/ubuntu/.ssh/id_ed25519
     permissions: "0600"
+    owner: ubuntu:ubuntu
     content: |
 {gitPrivateDeployKey}
   - path: /home/ubuntu/init.sh
