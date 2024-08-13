@@ -126,7 +126,7 @@ write_files:
         echo "MODEL='{model}'" >> .env
         
         # share repo between users
-        chown -R 1000:1100 /opt
+        chown -R ubuntu:sshusers /opt
         chmod -R 0775 /opt
 
         # up docker compose services
@@ -145,7 +145,6 @@ runcmd:
 
 groups:
   - name: sshusers
-    gid: 1100
 
 {users}
 """
