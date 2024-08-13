@@ -151,8 +151,8 @@ groups:
 """
 
 # debug
-print(userData)
-sys.exit(0)
+# print(userData)
+# sys.exit(0)
 
 def findInstance():
     instances = client.get(f"/cloud/project/{serviceName}/instance")
