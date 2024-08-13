@@ -102,7 +102,7 @@ write_files:
   - path: /opt/vllm/init.sh
     permissions: "0775"
     content: |
-        #!/bin/bash 
+        #!/bin/bash
 
         set -Eeuo pipefail
 

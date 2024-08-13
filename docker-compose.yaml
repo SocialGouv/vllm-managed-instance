@@ -10,6 +10,7 @@ services:
       - "--tensor-parallel-size=${TENSOR_PARALLEL_SIZE:-4}"
       # - "--max-parallel-loading-workers=1"
       - "--dtype=half" # https://github.com/vllm-project/vllm/issues/1157
+      - "--disable-log-request"
     expose:
       - "8000"
     ports:
@@ -29,6 +30,8 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+    volumes:
+      - /opt/vllm/cache:/root/.cache:rw
     healthcheck:
       test: curl --fail http://localhost:8000/v1/models || exit 1
       interval: 10s
