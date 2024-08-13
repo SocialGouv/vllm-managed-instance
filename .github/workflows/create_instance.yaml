@@ -38,6 +38,7 @@ jobs:
           OVH_REGION: ${{ vars.OVH_REGION }}
           
           USERS: ${{ vars.USERS }}
+          GIT_REPO: ${{ vars.GIT_REPO }}
 
           OVH_APPLICATION_KEY: ${{ secrets.OVH_APPLICATION_KEY }}
           OVH_APPLICATION_SECRET: ${{ secrets.OVH_APPLICATION_SECRET }}

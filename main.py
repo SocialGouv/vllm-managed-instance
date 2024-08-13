@@ -53,6 +53,7 @@ model = os.getenv("MODEL", "")
 users = os.getenv("USERS", "")
 gitPrivateDeployKey = os.getenv("GIT_PRIVATE_DEPLOY_KEY", "")
 pythonVersion = os.getenv("PYTHON_VERSION", "3.11")
+gitRepo = os.getenv("GIT_REPO", "")
 
 gitPrivateDeployKey = indentString(gitPrivateDeployKey, 8)
 
@@ -67,12 +68,13 @@ users:
       if 'primary_group' not in user:
           user['primary_group'] = user['name']
       if 'groups' not in user:
-          user['groups'] = [user['primary_group'], 'sshusers']
-      else:
-        if user['primary_group'] not in user['groups']:
+          user['groups'] = []
+      if user['primary_group'] not in user['groups']:
           user['groups'].append(user['primary_group'])
-          if 'sshusers' not in user['groups']:
-            user['groups'].append('sshusers')
+      if 'sshusers' not in user['groups']:
+          user['groups'].append('sshusers')
+      if 'docker' not in user['groups']:
+          user['groups'].append('docker')
   users = yaml.dump(parsedUsers)
 
 
@@ -86,35 +88,88 @@ userData = f"""
 ssh_pwauth: false
 
 packages:
+  # creds
   - apache2-utils
   - pwgen
+  
+  # debug
   - micro
   - bpytop
+  
+  # scripting
   - jq
-  - pyenv
+  
+  # python pyenv deps
+  - make
+  - build-essential
+  - libssl-dev
+  - zlib1g-dev
+  - libbz2-dev
+  - libreadline-dev
+  - libsqlite3-dev
+  - wget
+  - curl
+  - llvm
+  - libncurses5-dev
+  - libncursesw5-dev
+  - xz-utils
+  - tk-dev
+  - libffi-dev
+  - liblzma-dev
+  - python3-openssl
 
 write_files:
+  - path: /etc/profile.d/pyenv.sh
+    permissions: "0444"
+    owner: root:root
+    content: |
+        #!/bin/bash
+        export PYENV_ROOT="$HOME/.pyenv"
+        export PATH="$PYENV_ROOT/bin:$PATH"
+
+        # Check if pyenv is not installed
+        if ! command -v pyenv 1>/dev/null 2>&1; then
+            curl https://pyenv.run | bash
+            # Reload the shell to recognize pyenv
+            export PATH="$PYENV_ROOT/bin:$PATH"
+            eval "$(pyenv init --path)"
+            eval "$(pyenv init -)"
+            
+            PYTHON_VERSION="{pythonVersion}"
+            pyenv install $PYTHON_VERSION
+            pyenv global $PYTHON_VERSION
+            
+            # Install Poetry
+            curl -sSL https://install.python-poetry.org | python3 -
+            
+            # Set Poetry to use the pyenv Python version
+            poetry env use $(pyenv which python)
+        fi
+
+        eval "$(pyenv init --path)"
+        eval "$(pyenv init -)"
+
+
   - path: /home/ubuntu/.ssh/id_ed25519
     permissions: "0600"
     owner: ubuntu:ubuntu
     content: |
 {gitPrivateDeployKey}
   - path: /opt/vllm/init.sh
+    owner: ubuntu:sshusers
     permissions: "0775"
     content: |
         #!/bin/bash
 
         set -Eeuo pipefail
 
-        # setup extra packages
-        ## setup python env
-        pyenv install {pythonVersion}
-        pyenv global {pythonVersion}
-        curl -sSL https://install.python-poetry.org | python3 -
-        poetry env use $(pyenv which python)
+        sudo usermod -a -G sshusers ubuntu # ubuntu groups seem to be overided
 
         # init config
-        mkdir -p /opt/vllm
+        sudo mkdir -p /opt/vllm
+        sudo chown -R ubuntu:sshusers /opt
+        sudo chmod -R 0775 /opt
+
         cd /opt/vllm
         cat <<'EOF' > docker-compose.yaml
 {dockerCompose}
@@ -125,13 +180,16 @@ write_files:
         echo "HUGGING_FACE_HUB_TOKEN='{huggingFaceHubToken}'" >> .env
         echo "MODEL='{model}'" >> .env
         
-        # share repo between users
-        chown -R ubuntu:sshusers /opt
-        chmod -R 0775 /opt
-
         # up docker compose services
         docker compose up -d --build
         touch /tmp/runcmd_finished
+
+        # clone working git repo
+        cd /opt/vllm
+        if [ -n "{gitRepo}" ]; then
+            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+            sudo su - ubuntu -c "git clone {gitRepo}"
+        fi
   - path: /etc/ssh/sshd_config.d/90-custom-settings.conf
     content: |
       AuthenticationMethods publickey
