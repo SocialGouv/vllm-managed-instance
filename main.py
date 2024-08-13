@@ -52,19 +52,29 @@ huggingFaceHubToken = os.getenv("HUGGING_FACE_HUB_TOKEN")
 model = os.getenv("MODEL", "")
 users = os.getenv("USERS", "")
 gitPrivateDeployKey = os.getenv("GIT_PRIVATE_DEPLOY_KEY", "")
+pythonVersion = os.getenv("PYTHON_VERSION", "3.11")
 
 gitPrivateDeployKey = indentString(gitPrivateDeployKey, 8)
-
-allow_users = ""
 
 if users:
   users = f"""
 users:
 {users}
 """
-  user_names = [user['name'] for user in parsed_users['users'] if 'name' in user]
-  parsed_users = yaml.safe_load(raw_users)
-  allow_users = ' '.join(user_names)
+  parsedUsers = yaml.safe_load(users)
+  for user in parsedUsers['users']:
+    if 'name' in user:
+      if 'primary_group' not in user:
+          user['primary_group'] = user['name']
+      if 'groups' not in user:
+          user['groups'] = [user['primary_group'], 'sshusers']
+      else:
+        if user['primary_group'] not in user['groups']:
+          user['groups'].append(user['primary_group'])
+          if 'sshusers' not in user['groups']:
+            user['groups'].append('sshusers')
+  users = yaml.dump(parsedUsers)
+
 
 
 f = open("docker-compose.yaml", "r")
@@ -77,11 +87,11 @@ ssh_pwauth: false
 
 packages:
   - apache2-utils
-  - pwgenparsed_users = yaml.safe_load(raw_users)
+  - pwgen
   - micro
   - bpytop
-  - python3-poetry
   - jq
+  - pyenv
 
 write_files:
   - path: /home/ubuntu/.ssh/id_ed25519
@@ -89,13 +99,23 @@ write_files:
     owner: ubuntu:ubuntu
     content: |
 {gitPrivateDeployKey}
-  - path: /home/ubuntu/init.sh
-    permissions: "0755"
+  - path: /opt/vllm/init.sh
+    permissions: "0775"
     content: |
         #!/bin/bash 
 
         set -Eeuo pipefail
-        cd /home/ubuntu
+
+        # setup extra packages
+        ## setup python env
+        pyenv install {pythonVersion}
+        pyenv global {pythonVersion}
+        curl -sSL https://install.python-poetry.org | python3 -
+        poetry env use $(pyenv which python)
+
+        # init config
+        mkdir -p /opt/vllm
+        cd /opt/vllm
         cat <<'EOF' > docker-compose.yaml
 {dockerCompose}
         EOF
@@ -104,26 +124,35 @@ write_files:
         echo "CREDENTIALS='$(htpasswd -nBb user {authToken})'" >> .env
         echo "HUGGING_FACE_HUB_TOKEN='{huggingFaceHubToken}'" >> .env
         echo "MODEL='{model}'" >> .env
+        
+        # share repo between users
+        chown -R 1000:1100 /opt
+        chmod -R 0775 /opt
+
+        # up docker compose services
         docker compose up -d --build
         touch /tmp/runcmd_finished
-  - path: /etc/ssh/sshd_config
+  - path: /etc/ssh/sshd_config.d/90-custom-settings.conf
     content: |
-      Port 22
-      PermitRootLogin prohibit-password
+      AuthenticationMethods publickey
+      AuthorizedKeysFile .ssh/authorized_keys
       PasswordAuthentication no
-      ChallengeResponseAuthentication no
-      UsePAM yes
-      X11Forwarding yes
-      PrintMotd no
-      AcceptEnv LANG LC_*
-      Subsystem sftp /usr/lib/openssh/sftp-server
-      AllowUsers {allow_users}
+      PermitRootLogin no
+      AllowGroups sshusers
 
 runcmd:
-  - su - ubuntu -c '/home/ubuntu/init.sh > init.log 2>&1'
+  - su - ubuntu -c '/opt/vllm/init.sh > /var/log/vllm-init.log 2>&1'
+
+groups:
+  - name: sshusers
+    gid: 1100
 
 {users}
 """
+
+# debug
+# print(userData)
+# sys.exit(0)
 
 def findInstance():
     instances = client.get(f"/cloud/project/{serviceName}/instance")
