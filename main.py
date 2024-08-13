@@ -3,6 +3,7 @@ import sys
 import time
 import logging
 import requests
+import yaml
 
 import ovh
 from dotenv import load_dotenv
@@ -54,11 +55,17 @@ gitPrivateDeployKey = os.getenv("GIT_PRIVATE_DEPLOY_KEY", "")
 
 gitPrivateDeployKey = indentString(gitPrivateDeployKey, 8)
 
+allow_users = ""
+
 if users:
   users = f"""
 users:
 {users}
 """
+  user_names = [user['name'] for user in parsed_users['users'] if 'name' in user]
+  parsed_users = yaml.safe_load(raw_users)
+  allow_users = ' '.join(user_names)
+
 
 f = open("docker-compose.yaml", "r")
 dockerCompose = indentString(f.read(), 8)
@@ -66,9 +73,11 @@ dockerCompose = indentString(f.read(), 8)
 userData = f"""
 #cloud-config
 
+ssh_pwauth: false
+
 packages:
   - apache2-utils
-  - pwgen
+  - pwgenparsed_users = yaml.safe_load(raw_users)
   - micro
   - bpytop
   - python3-poetry
@@ -97,6 +106,18 @@ write_files:
         echo "MODEL='{model}'" >> .env
         docker compose up -d --build
         touch /tmp/runcmd_finished
+  - path: /etc/ssh/sshd_config
+    content: |
+      Port 22
+      PermitRootLogin prohibit-password
+      PasswordAuthentication no
+      ChallengeResponseAuthentication no
+      UsePAM yes
+      X11Forwarding yes
+      PrintMotd no
+      AcceptEnv LANG LC_*
+      Subsystem sftp /usr/lib/openssh/sftp-server
+      AllowUsers {allow_users}
 
 runcmd:
   - su - ubuntu -c '/home/ubuntu/init.sh > init.log 2>&1'
@@ -186,27 +207,24 @@ if action == "create":
         sys.exit(1)
     logger.info(f"Instance domain: {ip}.nip.io")
 
-    url = f"https://{ip}.nip.io/v1/models"
-    max_attempts = 120
-    wait_time = 5
-    attempt = 1
-    while attempt <= max_attempts:
-        try:
-            response = requests.get(url)
-            if response.status_code == 401:
-                logger.info(f"URL {url} is ready.")
-                break
-        except requests.ConnectionError:
-            # If there's a connection error, ignore and try again
-            pass
-
-        # If the response code is not 200, wait and try again
-        logger.info(f"Attempt {attempt}/{max_attempts}: URL not ready (HTTP status code: {response.status_code if 'response' in locals() else 'Connection error'}). Waiting {wait_time} seconds...")
-        time.sleep(wait_time)
-        attempt += 1
-    else:
-        logger.info("URL is not ready after maximum attempts.")
-        sys.exit(1)
+    # url = f"https://{ip}.nip.io/v1/models"
+    # max_attempts = 120
+    # wait_time = 5
+    # attempt = 1
+    # while attempt <= max_attempts:
+    #     try:
+    #         response = requests.get(url)
+    #         if response.status_code == 401:
+    #             logger.info(f"URL {url} is ready.")
+    #             break
+    #     except requests.ConnectionError:
+    #         pass
+    #     logger.info(f"Attempt {attempt}/{max_attempts}: URL not ready (HTTP status code: {response.status_code if 'response' in locals() else 'Connection error'}). Waiting {wait_time} seconds...")
+    #     time.sleep(wait_time)
+    #     attempt += 1
+    # else:
+    #     logger.info("URL is not ready after maximum attempts.")
+    #     sys.exit(1)
 
 
 
