@@ -4,9 +4,10 @@ services:
     image: vllm/vllm-openai:latest
     environment:
       HUGGING_FACE_HUB_TOKEN: "${HUGGING_FACE_HUB_TOKEN}"
+      VERBOSE: "${VERBOSE:-0}"
     command:
       - "--model=${MODEL:-mistralai/Mistral-7B-v0.1}"
-      - "--tensor-parallel-size=4"
+      - "--tensor-parallel-size=${TENSOR_PARALLEL_SIZE:-4}"
       # - "--max-parallel-loading-workers=1"
       - "--dtype=half" # https://github.com/vllm-project/vllm/issues/1157
     expose:
