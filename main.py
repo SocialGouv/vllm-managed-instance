@@ -54,6 +54,7 @@ users = os.getenv("USERS", "")
 gitPrivateDeployKey = os.getenv("GIT_PRIVATE_DEPLOY_KEY", "")
 pythonVersion = os.getenv("PYTHON_VERSION", "3.11")
 gitRepo = os.getenv("GIT_REPO", "")
+gitRepoUser = os.getenv("GIT_REPO_USER", "ubuntu")
 
 gitPrivateDeployKey = indentString(gitPrivateDeployKey, 8)
 
@@ -150,9 +151,9 @@ write_files:
         eval "$(pyenv init -)"
 
 
-  - path: /home/ubuntu/.ssh/id_ed25519
+  - path: /home/{gitRepoUser}/.ssh/id_ed25519
     permissions: "0600"
-    owner: ubuntu:ubuntu
+    owner: {gitRepoUser}:{gitRepoUser}
     content: |
 {gitPrivateDeployKey}
   - path: /opt/vllm/init.sh
@@ -191,7 +192,7 @@ write_files:
         cd /opt/vllm
         if [ -n "{gitRepo}" ]; then
             ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-            sudo su - ubuntu -c "git clone {gitRepo}"
+            sudo su - {gitRepoUser} -c "git clone {gitRepo}"
         fi
   - path: /etc/ssh/sshd_config.d/90-custom-settings.conf
     content: |
