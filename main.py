@@ -192,7 +192,7 @@ write_files:
         cd /opt/vllm
         if [ -n "{gitRepo}" ]; then
             ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-            sudo su - {gitRepoUser} -c "git clone {gitRepo}"
+            sudo su - {gitRepoUser} -c "git clone --shared=group {gitRepo}"
         fi
   - path: /etc/ssh/sshd_config.d/90-custom-settings.conf
     content: |
