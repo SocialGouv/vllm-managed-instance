@@ -156,13 +156,16 @@ write_files:
     content: |
 {gitPrivateDeployKey}
   - path: /opt/vllm/init.sh
-    owner: ubuntu:sshusers
+    owner: ubuntu:ubuntu
     permissions: "0775"
     content: |
         #!/bin/bash
 
         set -Eeuo pipefail
 
+        if ! getent group "sshusers" > /dev/null 2>&1; then
+          sudo groupadd sshusers
+        fi
         sudo usermod -a -G sshusers ubuntu # ubuntu groups seem to be overided
 
         # init config
