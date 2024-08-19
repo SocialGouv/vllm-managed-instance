@@ -14,7 +14,7 @@ services:
       # - "--max-parallel-loading-workers=1"
       - "--dtype=half" # https://github.com/vllm-project/vllm/issues/1157
       - "--disable-log-request"
-      - "--download-dir=https://s3.gra.io.cloud.ovh.net/vllm-cache/${MODEL:-mistralai/Mistral-7B-v0.1}"
+      - "--download-dir=s3://vllm-cache"
     expose:
       - "8000"
     ports:
