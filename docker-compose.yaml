@@ -5,12 +5,15 @@ services:
     environment:
       HUGGING_FACE_HUB_TOKEN: "${HUGGING_FACE_HUB_TOKEN}"
       VERBOSE: "${VERBOSE:-0}"
+      S3_ACCESS_KEY_ID: "${S3_ACCESS_KEY_ID}"
+      S3_SECRET_ACCESS_KEY: "${S3_SECRET_ACCESS_KEY}"
     command:
       - "--model=${MODEL:-mistralai/Mistral-7B-v0.1}"
       - "--tensor-parallel-size=${TENSOR_PARALLEL_SIZE:-4}"
       # - "--max-parallel-loading-workers=1"
       - "--dtype=half" # https://github.com/vllm-project/vllm/issues/1157
       - "--disable-log-request"
+      - "--download-dir=https://s3.gra.io.cloud.ovh.net/vllm-cache/${MODEL:-mistralai/Mistral-7B-v0.1}"
     expose:
       - "8000"
     ports:
