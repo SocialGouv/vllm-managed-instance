@@ -51,9 +51,6 @@ authToken = getRequiredEnv("AUTH_TOKEN")
 huggingFaceHubToken = os.getenv("HUGGING_FACE_HUB_TOKEN")
 model = os.getenv("MODEL", "")
 users = os.getenv("USERS", "")
-gitPrivateDeployKey = os.getenv("GIT_PRIVATE_DEPLOY_KEY", "")
-
-gitPrivateDeployKey = indentString(gitPrivateDeployKey, 8)
 
 if users:
   users = f"""
@@ -97,7 +94,6 @@ write_files:
     permissions: "0600"
     owner: ubuntu:ubuntu
     content: |
-{gitPrivateDeployKey}
   - path: /opt/vllm/init.sh
     owner: ubuntu:ubuntu
     permissions: "0775"
