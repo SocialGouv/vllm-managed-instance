@@ -52,8 +52,6 @@ huggingFaceHubToken = os.getenv("HUGGING_FACE_HUB_TOKEN")
 model = os.getenv("MODEL", "")
 users = os.getenv("USERS", "")
 gitPrivateDeployKey = os.getenv("GIT_PRIVATE_DEPLOY_KEY", "")
-pythonVersion = os.getenv("PYTHON_VERSION", "3.11")
-gitRepo = os.getenv("GIT_REPO", "")
 
 gitPrivateDeployKey = indentString(gitPrivateDeployKey, 8)
 
@@ -94,28 +92,6 @@ packages:
   - micro
   - bpytop
   
-  # scripting
-  - jq
-  
-  # python pyenv deps
-  - make
-  - build-essential
-  - libssl-dev
-  - zlib1g-dev
-  - libbz2-dev
-  - libreadline-dev
-  - libsqlite3-dev
-  - wget
-  - curl
-  - llvm
-  - libncurses5-dev
-  - libncursesw5-dev
-  - xz-utils
-  - tk-dev
-  - libffi-dev
-  - liblzma-dev
-  - python3-openssl
-
 write_files:
   - path: /home/ubuntu/.ssh/id_ed25519
     permissions: "0600"
@@ -145,33 +121,6 @@ write_files:
         
         # up docker compose services
         docker compose up -d --build
-
-        # clone working git repo
-        cd /opt/vllm
-        if [ -n "{gitRepo}" ]; then
-            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-            git clone {gitRepo}
-        fi
-        
-        # setup python
-        curl https://pyenv.run | bash
-        export PYENV_ROOT="$HOME/.pyenv"
-        export PATH="$PYENV_ROOT/bin:$PATH"
-        eval "$(pyenv init --path)"
-        eval "$(pyenv init -)"
-        PYTHON_VERSION="{pythonVersion}"
-        pyenv install $PYTHON_VERSION
-        pyenv global $PYTHON_VERSION
-        curl -sSL https://install.python-poetry.org | python3 -
-        poetry env use $(pyenv which python)
-
-        # setup python profile
-        cat <<'EOF' >> ~/.profile
-        export PYENV_ROOT="$HOME/.pyenv"
-        export PATH="$PYENV_ROOT/bin:$PATH"
-        eval "$(pyenv init --path)"
-        eval "$(pyenv init -)"
-        EOF
 
         touch /tmp/runcmd_finished
 
