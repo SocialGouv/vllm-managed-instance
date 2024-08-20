@@ -155,6 +155,7 @@ write_files:
         
         # setup python
         curl https://pyenv.run | bash
+        export PYENV_ROOT="$HOME/.pyenv"
         export PATH="$PYENV_ROOT/bin:$PATH"
         eval "$(pyenv init --path)"
         eval "$(pyenv init -)"
@@ -183,7 +184,7 @@ write_files:
       AllowGroups ubuntu
 
 runcmd:
-  - su - ubuntu -c '/opt/vllm/init.sh > /var/log/vllm-init.log 2>&1'
+  - su - ubuntu -c '/opt/vllm/init.sh > /opt/vllm/init.log 2>&1'
 
 {users}
 """
