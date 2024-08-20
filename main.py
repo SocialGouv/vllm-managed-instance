@@ -48,7 +48,9 @@ flavorId = getRequiredEnv("OVH_INSTANCE_FLAVOR_ID")
 imageId = getRequiredEnv("OVH_INSTANCE_IMAGE_ID")
 region = getRequiredEnv("OVH_REGION")
 authToken = getRequiredEnv("AUTH_TOKEN")
-huggingFaceHubToken = os.getenv("HUGGING_FACE_HUB_TOKEN")
+huggingFaceHubToken = getRequiredEnv("HUGGING_FACE_HUB_TOKEN")
+s3AccessKeyId = getRequiredEnv("S3_ACCESS_KEY_ID")
+s3SecretAccessKey = getRequiredEnv("S3_SECRET_ACCESS_KEY")
 model = os.getenv("MODEL", "")
 users = os.getenv("USERS", "")
 
@@ -114,6 +116,8 @@ write_files:
         echo "CREDENTIALS='$(htpasswd -nBb user {authToken})'" >> .env
         echo "HUGGING_FACE_HUB_TOKEN='{huggingFaceHubToken}'" >> .env
         echo "MODEL='{model}'" >> .env
+        echo "S3_ACCESS_KEY_ID='{s3AccessKeyId}'" >> .env
+        echo "S3_SECRET_ACCESS_KEY='{s3SecretAccessKey}'" >> .env
         
         # up docker compose services
         docker compose up -d --build
