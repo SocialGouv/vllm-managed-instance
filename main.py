@@ -165,7 +165,7 @@ write_files:
         poetry env use $(pyenv which python)
 
         # setup python profile
-        cat <<'EOF' > ~/.profile
+        cat <<'EOF' >> ~/.profile
         export PYENV_ROOT="$HOME/.pyenv"
         export PATH="$PYENV_ROOT/bin:$PATH"
         eval "$(pyenv init --path)"
