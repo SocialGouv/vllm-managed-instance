@@ -117,37 +117,6 @@ packages:
   - python3-openssl
 
 write_files:
-  - path: /etc/profile.d/pyenv.sh
-    permissions: "0444"
-    owner: root:root
-    content: |
-        #!/bin/bash
-        export PYENV_ROOT="$HOME/.pyenv"
-        export PATH="$PYENV_ROOT/bin:$PATH"
-
-        # Check if pyenv is not installed
-        if ! command -v pyenv 1>/dev/null 2>&1; then
-            curl https://pyenv.run | bash
-            # Reload the shell to recognize pyenv
-            export PATH="$PYENV_ROOT/bin:$PATH"
-            eval "$(pyenv init --path)"
-            eval "$(pyenv init -)"
-            
-            PYTHON_VERSION="{pythonVersion}"
-            pyenv install $PYTHON_VERSION
-            pyenv global $PYTHON_VERSION
-            
-            # Install Poetry
-            curl -sSL https://install.python-poetry.org | python3 -
-            
-            # Set Poetry to use the pyenv Python version
-            poetry env use $(pyenv which python)
-        fi
-
-        eval "$(pyenv init --path)"
-        eval "$(pyenv init -)"
-
-
   - path: /home/ubuntu/.ssh/id_ed25519
     permissions: "0600"
     owner: ubuntu:ubuntu
@@ -158,8 +127,6 @@ write_files:
     permissions: "0775"
     content: |
         #!/bin/bash
-
-        set -Eeuo pipefail
 
         # init config
         sudo mkdir -p /opt/vllm
@@ -178,14 +145,35 @@ write_files:
         
         # up docker compose services
         docker compose up -d --build
-        touch /tmp/runcmd_finished
 
         # clone working git repo
         cd /opt/vllm
         if [ -n "{gitRepo}" ]; then
             ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-            sudo su - ubuntu -c "git clone {gitRepo}"
+            git clone {gitRepo}
         fi
+        
+        # setup python
+        curl https://pyenv.run | bash
+        export PATH="$PYENV_ROOT/bin:$PATH"
+        eval "$(pyenv init --path)"
+        eval "$(pyenv init -)"
+        PYTHON_VERSION="{pythonVersion}"
+        pyenv install $PYTHON_VERSION
+        pyenv global $PYTHON_VERSION
+        curl -sSL https://install.python-poetry.org | python3 -
+        poetry env use $(pyenv which python)
+
+        # setup python profile
+        cat <<'EOF' > ~/.profile
+        export PYENV_ROOT="$HOME/.pyenv"
+        export PATH="$PYENV_ROOT/bin:$PATH"
+        eval "$(pyenv init --path)"
+        eval "$(pyenv init -)"
+        EOF
+
+        touch /tmp/runcmd_finished
+
   - path: /etc/ssh/sshd_config.d/90-custom-settings.conf
     content: |
       AuthenticationMethods publickey
