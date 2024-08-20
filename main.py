@@ -54,7 +54,6 @@ users = os.getenv("USERS", "")
 gitPrivateDeployKey = os.getenv("GIT_PRIVATE_DEPLOY_KEY", "")
 pythonVersion = os.getenv("PYTHON_VERSION", "3.11")
 gitRepo = os.getenv("GIT_REPO", "")
-gitRepoUser = os.getenv("GIT_REPO_USER", "ubuntu")
 
 gitPrivateDeployKey = indentString(gitPrivateDeployKey, 8)
 
@@ -72,8 +71,6 @@ users:
           user['groups'] = []
       if user['primary_group'] not in user['groups']:
           user['groups'].append(user['primary_group'])
-      if 'sshusers' not in user['groups']:
-          user['groups'].append('sshusers')
       if 'docker' not in user['groups']:
           user['groups'].append('docker')
   users = yaml.dump(parsedUsers)
@@ -151,9 +148,9 @@ write_files:
         eval "$(pyenv init -)"
 
 
-  - path: /home/{gitRepoUser}/.ssh/id_ed25519
+  - path: /home/ubuntu/.ssh/id_ed25519
     permissions: "0600"
-    owner: {gitRepoUser}:{gitRepoUser}
+    owner: ubuntu:ubuntu
     content: |
 {gitPrivateDeployKey}
   - path: /opt/vllm/init.sh
@@ -164,14 +161,9 @@ write_files:
 
         set -Eeuo pipefail
 
-        if ! getent group "sshusers" > /dev/null 2>&1; then
-          sudo groupadd sshusers
-        fi
-        sudo usermod -a -G sshusers ubuntu # ubuntu groups seem to be overided
-
         # init config
         sudo mkdir -p /opt/vllm
-        sudo chown -R ubuntu:sshusers /opt
+        sudo chown -R ubuntu:ubuntu /opt
         sudo chmod -R 0775 /opt
 
         cd /opt/vllm
@@ -192,7 +184,7 @@ write_files:
         cd /opt/vllm
         if [ -n "{gitRepo}" ]; then
             ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-            sudo su - {gitRepoUser} -c "git clone --shared=group {gitRepo}"
+            sudo su - ubuntu -c "git clone {gitRepo}"
         fi
   - path: /etc/ssh/sshd_config.d/90-custom-settings.conf
     content: |
@@ -200,13 +192,10 @@ write_files:
       AuthorizedKeysFile .ssh/authorized_keys
       PasswordAuthentication no
       PermitRootLogin no
-      AllowGroups sshusers
+      AllowGroups ubuntu
 
 runcmd:
   - su - ubuntu -c '/opt/vllm/init.sh > /var/log/vllm-init.log 2>&1'
-
-groups:
-  - name: sshusers
 
 {users}
 """
