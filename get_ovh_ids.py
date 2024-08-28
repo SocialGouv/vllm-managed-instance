@@ -35,9 +35,17 @@ def main():
         flavor_id = get_flavor_id(client, region, flavor_name)
         image_id = get_image_id(client, region, image_name, flavor_id)
 
-        # Set environment variables for the next step in the GitHub Actions workflow
-        print(f"::set-output name=OVH_INSTANCE_FLAVOR_ID::{flavor_id}")
-        print(f"::set-output name=OVH_INSTANCE_IMAGE_ID::{image_id}")
+        # Write to GitHub Actions output file
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+            print(f"OVH_INSTANCE_FLAVOR_ID={flavor_id}", file=fh)
+            print(f"OVH_INSTANCE_IMAGE_ID={image_id}", file=fh)
+
+        # Also set environment variables for the current process
+        os.environ['OVH_INSTANCE_FLAVOR_ID'] = flavor_id
+        os.environ['OVH_INSTANCE_IMAGE_ID'] = image_id
+
+        print(f"Flavor ID: {flavor_id}")
+        print(f"Image ID: {image_id}")
     except ValueError as e:
         print(f"Error: {str(e)}", file=sys.stderr)
         sys.exit(1)

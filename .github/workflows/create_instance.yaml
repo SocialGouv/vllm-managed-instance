@@ -14,7 +14,7 @@ on:
       ovhInstanceFlavorName:
         description: 'OVH instance flavor name'
         required: true
-        default: 'B2-30'
+        default: 'b2-30'
       ovhInstanceImageName:
         description: 'OVH instance image name'
         required: true
@@ -42,6 +42,7 @@ jobs:
         run: poetry install
 
       - name: Get OVH IDs
+        id: get_ovh_ids
         run: poetry run python get_ovh_ids.py
         env:
           OVH_ENDPOINT: ${{ vars.OVH_ENDPOINT }}
@@ -53,12 +54,12 @@ jobs:
           OVH_CONSUMER_KEY: ${{ secrets.OVH_CONSUMER_KEY }}
           OVH_SERVICE_NAME: ${{ secrets.OVH_SERVICE_NAME }}
 
-      - name: Run Python script
+      - name: Create instance
         run: poetry run python main.py create
         env:
           OVH_ENDPOINT: ${{ vars.OVH_ENDPOINT }}
-          OVH_INSTANCE_FLAVOR_ID: ${{ env.OVH_INSTANCE_FLAVOR_ID }}
-          OVH_INSTANCE_IMAGE_ID: ${{ env.OVH_INSTANCE_IMAGE_ID }}
+          OVH_INSTANCE_FLAVOR_ID: ${{ steps.get_ovh_ids.outputs.OVH_INSTANCE_FLAVOR_ID }}
+          OVH_INSTANCE_IMAGE_ID: ${{ steps.get_ovh_ids.outputs.OVH_INSTANCE_IMAGE_ID }}
           OVH_REGION: ${{ inputs.ovhInstanceRegion }}
           
           USERS: ${{ vars.USERS }}
