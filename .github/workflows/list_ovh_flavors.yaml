@@ -1,15 +1,10 @@
-name: List OVH Instance Images for Flavor
+name: List OVH Instance Flavors
 
 on:
   workflow_dispatch:
-    inputs:
-      flavor_id:
-        description: 'Flavor ID to list images for'
-        required: true
-        type: string
 
 jobs:
-  list-ovh-images:
+  list-ovh-flavors:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -30,7 +25,7 @@ jobs:
           echo "OVH_ENDPOINT: ${{ vars.OVH_ENDPOINT }}"
           echo "OVH_SERVICE_NAME: ${{ secrets.OVH_SERVICE_NAME }}"
 
-      - name: Run OVH API script to list images for flavor
+      - name: Run OVH API script to list flavors
         env:
           OVH_ENDPOINT: ${{ vars.OVH_ENDPOINT }}
           OVH_APPLICATION_KEY: ${{ secrets.OVH_APPLICATION_KEY }}
@@ -38,17 +33,17 @@ jobs:
           OVH_CONSUMER_KEY: ${{ secrets.OVH_CONSUMER_KEY }}
           OVH_SERVICE_NAME: ${{ secrets.OVH_SERVICE_NAME }}
         run: |
-          echo "::group::OVH Instance Images for Flavor ${{ github.event.inputs.flavor_id }}"
-          python ovh_instance_list.py ${{ github.event.inputs.flavor_id }}
+          echo "::group::OVH Instance Flavors"
+          python ovh_instance_list.py
           echo "::endgroup::"
 
       - name: Check result file
         run: |
-          echo "Content of ovh_images_${{ github.event.inputs.flavor_id }}.json:"
-          cat ovh_images_${{ github.event.inputs.flavor_id }}.json
+          echo "Content of ovh_flavors.json:"
+          cat ovh_flavors.json
 
       - name: Upload results
         uses: actions/upload-artifact@v2
         with:
-          name: ovh-images-list-${{ github.event.inputs.flavor_id }}
-          path: ovh_images_${{ github.event.inputs.flavor_id }}.json
+          name: ovh-flavors-list
+          path: ovh_flavors.json

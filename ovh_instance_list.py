@@ -49,7 +49,7 @@ def get_images(client, service_name, region, flavor_id):
         print(f"Error fetching images for service {service_name}, region {region}, flavor {flavor_id}: {str(e)}")
         return []
 
-def main():
+def list_flavors():
     client = initialize_ovh_client()
     service_name = os.environ.get('OVH_SERVICE_NAME')
     
@@ -63,45 +63,71 @@ def main():
     regions = ["GRA11", "GRA9"]
 
     for region in regions:
-        result[region] = {
-            'flavors': [],
-            'images': {}
-        }
+        result[region] = []
         
         flavors = get_flavors(client, service_name, region)
         
         for flavor in flavors:
-            flavor_id = flavor['id']
-            result[region]['flavors'].append({
-                'id': flavor_id,
+            result[region].append({
+                'id': flavor['id'],
                 'name': flavor['name'],
                 'region': region,
                 'ram': flavor['ram'],
                 'disk': flavor['disk'],
                 'vcpus': flavor['vcpus']
             })
-            
-            images = get_images(client, service_name, region, flavor_id)
-            result[region]['images'][flavor_id] = [
-                {
-                    'id': image['id'],
-                    'name': image['name'],
-                    'region': region
-                } for image in images
-            ]
     
     # Write results to a JSON file
-    with open('ovh_instance_list.json', 'w') as f:
+    with open('ovh_flavors.json', 'w') as f:
         json.dump(result, f, indent=2)
     
     # Print results to console
-    print("\nOVH Instance Flavors and Images by Region:")
+    print("\nOVH Instance Flavors by Region:")
     print(json.dumps(result, indent=2))
     
     if result:
-        print("\nResults have been saved to ovh_instance_list.json")
+        print("\nResults have been saved to ovh_flavors.json")
+    else:
+        print("\nNo data was retrieved. Please check your OVH account and permissions.")
+
+def list_images_for_flavor(flavor_id):
+    client = initialize_ovh_client()
+    service_name = os.environ.get('OVH_SERVICE_NAME')
+    
+    if not service_name:
+        print("Error: OVH_SERVICE_NAME environment variable is not set.")
+        sys.exit(1)
+
+    print(f"Using OVH_SERVICE_NAME: {service_name}")
+    
+    result = {}
+    regions = ["GRA11", "GRA9"]
+
+    for region in regions:
+        images = get_images(client, service_name, region, flavor_id)
+        result[region] = [
+            {
+                'id': image['id'],
+                'name': image['name'],
+                'region': region
+            } for image in images
+        ]
+    
+    # Write results to a JSON file
+    with open(f'ovh_images_{flavor_id}.json', 'w') as f:
+        json.dump(result, f, indent=2)
+    
+    # Print results to console
+    print(f"\nOVH Images for Flavor {flavor_id} by Region:")
+    print(json.dumps(result, indent=2))
+    
+    if result:
+        print(f"\nResults have been saved to ovh_images_{flavor_id}.json")
     else:
         print("\nNo data was retrieved. Please check your OVH account and permissions.")
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1:
+        list_images_for_flavor(sys.argv[1])
+    else:
+        list_flavors()
