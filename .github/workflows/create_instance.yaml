@@ -11,6 +11,18 @@ on:
         description: 'Instance name suffix'
         required: false
         default: ''
+      ovhInstanceFlavorId:
+        description: 'OVH instance flavor id'
+        required: true
+        default: ''
+      ovhInstanceImageId:
+        description: 'OVH instance image id'
+        required: true
+        default: ''
+      ovhInstanceRegion:
+        description: 'OVH instance region'
+        required: true
+        default: 'GRA11'
 
 jobs:
   create-instance:
@@ -33,9 +45,9 @@ jobs:
         run: poetry run python main.py create
         env:
           OVH_ENDPOINT: ${{ vars.OVH_ENDPOINT }}
-          OVH_INSTANCE_FLAVOR_ID: ${{ vars.OVH_INSTANCE_FLAVOR_ID }}
-          OVH_INSTANCE_IMAGE_ID: ${{ vars.OVH_INSTANCE_IMAGE_ID }}
-          OVH_REGION: ${{ vars.OVH_REGION }}
+          OVH_INSTANCE_FLAVOR_ID: ${{ inputs.ovhInstanceFlavorId }}
+          OVH_INSTANCE_IMAGE_ID: ${{ inputs.ovhInstanceImageId }}
+          OVH_REGION: ${{ inputs.ovhInstanceRegion }}
           
           USERS: ${{ vars.USERS }}
 
