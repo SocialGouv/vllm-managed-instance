@@ -15,12 +15,14 @@ def initialize_ovh_client():
         sys.exit(1)
 
     try:
-        return ovh.Client(
+        client = ovh.Client(
             endpoint=endpoint,
             application_key=application_key,
             application_secret=application_secret,
             consumer_key=consumer_key
         )
+        print(f"Successfully initialized OVH client with endpoint: {endpoint}")
+        return client
     except ovh.exceptions.InvalidRegion as e:
         print(f"Error: Invalid OVH endpoint. {str(e)}")
         print("Please ensure the OVH_ENDPOINT environment variable is set to a valid endpoint.")
@@ -29,23 +31,38 @@ def initialize_ovh_client():
         print(f"Error initializing OVH client: {str(e)}")
         sys.exit(1)
 
-def get_regions(client):
+def get_projects(client):
     try:
-        return client.get('/cloud/project')
+        projects = client.get('/cloud/project')
+        print(f"Retrieved {len(projects)} projects")
+        return projects
     except Exception as e:
-        print(f"Error fetching regions: {str(e)}")
+        print(f"Error fetching projects: {str(e)}")
+        return []
+
+def get_regions(client, project_id):
+    try:
+        regions = client.get(f'/cloud/project/{project_id}/region')
+        print(f"Retrieved {len(regions)} regions for project {project_id}")
+        return regions
+    except Exception as e:
+        print(f"Error fetching regions for project {project_id}: {str(e)}")
         return []
 
 def get_flavors(client, project_id, region):
     try:
-        return client.get(f'/cloud/project/{project_id}/region/{region}/flavor')
+        flavors = client.get(f'/cloud/project/{project_id}/region/{region}/flavor')
+        print(f"Retrieved {len(flavors)} flavors for project {project_id}, region {region}")
+        return flavors
     except Exception as e:
         print(f"Error fetching flavors for project {project_id}, region {region}: {str(e)}")
         return []
 
 def get_images(client, project_id, region):
     try:
-        return client.get(f'/cloud/project/{project_id}/region/{region}/image')
+        images = client.get(f'/cloud/project/{project_id}/region/{region}/image')
+        print(f"Retrieved {len(images)} images for project {project_id}, region {region}")
+        return images
     except Exception as e:
         print(f"Error fetching images for project {project_id}, region {region}: {str(e)}")
         return []
@@ -53,14 +70,14 @@ def get_images(client, project_id, region):
 def main():
     client = initialize_ovh_client()
     result = {}
-    projects = get_regions(client)
+    projects = get_projects(client)
+
+    if not projects:
+        print("No projects found. Please check your OVH account and ensure you have the necessary permissions.")
+        return
 
     for project_id in projects:
-        try:
-            regions = client.get(f'/cloud/project/{project_id}/region')
-        except Exception as e:
-            print(f"Error fetching regions for project {project_id}: {str(e)}")
-            continue
+        regions = get_regions(client, project_id)
         
         for region in regions:
             if region not in result:
@@ -85,10 +102,13 @@ def main():
         json.dump(result, f, indent=2)
     
     # Print results to console
-    print("OVH Instance Flavors and Images by Region:")
+    print("\nOVH Instance Flavors and Images by Region:")
     print(json.dumps(result, indent=2))
     
-    print("\nResults have been saved to ovh_instance_list.json")
+    if result:
+        print("\nResults have been saved to ovh_instance_list.json")
+    else:
+        print("\nNo data was retrieved. Please check your OVH account and permissions.")
 
 if __name__ == "__main__":
     main()

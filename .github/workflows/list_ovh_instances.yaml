@@ -22,7 +22,7 @@ jobs:
 
       - name: Check OVH_ENDPOINT
         run: |
-          echo "OVH_ENDPOINT: ${{ secrets.OVH_ENDPOINT }}"
+          echo "OVH_ENDPOINT: ${{ vars.OVH_ENDPOINT }}"
 
       - name: Run OVH API script
         env:
@@ -34,6 +34,11 @@ jobs:
           echo "::group::OVH Instance Flavors and Images"
           python ovh_instance_list.py
           echo "::endgroup::"
+
+      - name: Check result file
+        run: |
+          echo "Content of ovh_instance_list.json:"
+          cat ovh_instance_list.json
 
       - name: Upload results
         uses: actions/upload-artifact@v2
