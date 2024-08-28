@@ -31,71 +31,61 @@ def initialize_ovh_client():
         print(f"Error initializing OVH client: {str(e)}")
         sys.exit(1)
 
-def get_projects(client):
+def get_regions(client, service_name):
     try:
-        projects = client.get('/cloud/project')
-        print(f"Retrieved {len(projects)} projects")
-        return projects
-    except Exception as e:
-        print(f"Error fetching projects: {str(e)}")
-        return []
-
-def get_regions(client, project_id):
-    try:
-        regions = client.get(f'/cloud/project/{project_id}/region')
-        print(f"Retrieved {len(regions)} regions for project {project_id}")
+        regions = client.get(f'/cloud/project/{service_name}/region')
+        print(f"Retrieved {len(regions)} regions for service {service_name}")
         return regions
     except Exception as e:
-        print(f"Error fetching regions for project {project_id}: {str(e)}")
+        print(f"Error fetching regions for service {service_name}: {str(e)}")
         return []
 
-def get_flavors(client, project_id, region):
+def get_flavors(client, service_name, region):
     try:
-        flavors = client.get(f'/cloud/project/{project_id}/region/{region}/flavor')
-        print(f"Retrieved {len(flavors)} flavors for project {project_id}, region {region}")
+        flavors = client.get(f'/cloud/project/{service_name}/region/{region}/flavor')
+        print(f"Retrieved {len(flavors)} flavors for service {service_name}, region {region}")
         return flavors
     except Exception as e:
-        print(f"Error fetching flavors for project {project_id}, region {region}: {str(e)}")
+        print(f"Error fetching flavors for service {service_name}, region {region}: {str(e)}")
         return []
 
-def get_images(client, project_id, region):
+def get_images(client, service_name, region):
     try:
-        images = client.get(f'/cloud/project/{project_id}/region/{region}/image')
-        print(f"Retrieved {len(images)} images for project {project_id}, region {region}")
+        images = client.get(f'/cloud/project/{service_name}/region/{region}/image')
+        print(f"Retrieved {len(images)} images for service {service_name}, region {region}")
         return images
     except Exception as e:
-        print(f"Error fetching images for project {project_id}, region {region}: {str(e)}")
+        print(f"Error fetching images for service {service_name}, region {region}: {str(e)}")
         return []
 
 def main():
     client = initialize_ovh_client()
-    result = {}
-    projects = get_projects(client)
+    service_name = os.environ.get('OVH_SERVICE_NAME')
+    
+    if not service_name:
+        print("Error: OVH_SERVICE_NAME environment variable is not set.")
+        sys.exit(1)
 
-    if not projects:
-        print("No projects found. Please check your OVH account and ensure you have the necessary permissions.")
+    print(f"Using OVH_SERVICE_NAME: {service_name}")
+    
+    result = {}
+    regions = get_regions(client, service_name)
+
+    if not regions:
+        print("No regions found. Please check your OVH account and ensure you have the necessary permissions.")
         return
 
-    for project_id in projects:
-        regions = get_regions(client, project_id)
+    for region in regions:
+        result[region] = {
+            'flavors': [],
+            'images': []
+        }
         
-        for region in regions:
-            if region not in result:
-                result[region] = {
-                    'flavors': [],
-                    'images': []
-                }
-            
-            flavors = get_flavors(client, project_id, region)
-            images = get_images(client, project_id, region)
-            
-            result[region]['flavors'].extend([flavor['id'] for flavor in flavors])
-            result[region]['images'].extend([image['id'] for image in images])
-    
-    # Remove duplicates
-    for region in result:
-        result[region]['flavors'] = list(set(result[region]['flavors']))
-        result[region]['images'] = list(set(result[region]['images']))
+        flavors = get_flavors(client, service_name, region)
+        images = get_images(client, service_name, region)
+        
+        result[region]['flavors'] = [flavor['id'] for flavor in flavors]
+        result[region]['images'] = [image['id'] for image in images]
     
     # Write results to a JSON file
     with open('ovh_instance_list.json', 'w') as f:
