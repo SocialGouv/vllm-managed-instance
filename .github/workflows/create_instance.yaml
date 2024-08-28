@@ -14,11 +14,11 @@ on:
       ovhInstanceFlavorName:
         description: 'OVH instance flavor name'
         required: true
-        default: ''
+        default: 'B2-30'
       ovhInstanceImageName:
         description: 'OVH instance image name'
         required: true
-        default: ''
+        default: 'NVIDIA GPU Cloud (NGC)'
       ovhInstanceRegion:
         description: 'OVH instance region'
         required: true
@@ -51,6 +51,7 @@ jobs:
           OVH_APPLICATION_KEY: ${{ secrets.OVH_APPLICATION_KEY }}
           OVH_APPLICATION_SECRET: ${{ secrets.OVH_APPLICATION_SECRET }}
           OVH_CONSUMER_KEY: ${{ secrets.OVH_CONSUMER_KEY }}
+          OVH_SERVICE_NAME: ${{ secrets.OVH_SERVICE_NAME }}
 
       - name: Run Python script
         run: poetry run python main.py create
