@@ -31,16 +31,6 @@ def initialize_ovh_client():
         print(f"Error initializing OVH client: {str(e)}")
         sys.exit(1)
 
-def get_regions(client, service_name):
-    try:
-        regions = client.get(f'/cloud/project/{service_name}/region')
-        gra_regions = [region for region in regions if region.startswith('GRA')]
-        print(f"Retrieved {len(gra_regions)} GRA regions for service {service_name}")
-        return gra_regions
-    except Exception as e:
-        print(f"Error fetching regions for service {service_name}: {str(e)}")
-        return []
-
 def get_flavors(client, service_name, region):
     try:
         flavors = client.get(f'/cloud/project/{service_name}/flavor', region=region)
@@ -70,11 +60,7 @@ def main():
     print(f"Using OVH_SERVICE_NAME: {service_name}")
     
     result = {}
-    regions = get_regions(client, service_name)
-
-    if not regions:
-        print("No GRA regions found. Please check your OVH account and ensure you have access to GRA regions.")
-        return
+    regions = ["GRA11", "GRA9"]
 
     for region in regions:
         result[region] = {
@@ -86,10 +72,23 @@ def main():
         
         for flavor in flavors:
             flavor_id = flavor['id']
-            result[region]['flavors'].append(flavor_id)
+            result[region]['flavors'].append({
+                'id': flavor_id,
+                'name': flavor['name'],
+                'region': region,
+                'ram': flavor['ram'],
+                'disk': flavor['disk'],
+                'vcpus': flavor['vcpus']
+            })
             
             images = get_images(client, service_name, region, flavor_id)
-            result[region]['images'][flavor_id] = [image['id'] for image in images]
+            result[region]['images'][flavor_id] = [
+                {
+                    'id': image['id'],
+                    'name': image['name'],
+                    'region': region
+                } for image in images
+            ]
     
     # Write results to a JSON file
     with open('ovh_instance_list.json', 'w') as f:
