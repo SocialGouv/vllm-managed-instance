@@ -11,12 +11,12 @@ on:
         description: 'Instance name suffix'
         required: false
         default: ''
-      ovhInstanceFlavorId:
-        description: 'OVH instance flavor id'
+      ovhInstanceFlavorName:
+        description: 'OVH instance flavor name'
         required: true
         default: ''
-      ovhInstanceImageId:
-        description: 'OVH instance image id'
+      ovhInstanceImageName:
+        description: 'OVH instance image name'
         required: true
         default: ''
       ovhInstanceRegion:
@@ -41,12 +41,23 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
+      - name: Get OVH IDs
+        run: poetry run python get_ovh_ids.py
+        env:
+          OVH_ENDPOINT: ${{ vars.OVH_ENDPOINT }}
+          OVH_INSTANCE_FLAVOR_NAME: ${{ inputs.ovhInstanceFlavorName }}
+          OVH_INSTANCE_IMAGE_NAME: ${{ inputs.ovhInstanceImageName }}
+          OVH_REGION: ${{ inputs.ovhInstanceRegion }}
+          OVH_APPLICATION_KEY: ${{ secrets.OVH_APPLICATION_KEY }}
+          OVH_APPLICATION_SECRET: ${{ secrets.OVH_APPLICATION_SECRET }}
+          OVH_CONSUMER_KEY: ${{ secrets.OVH_CONSUMER_KEY }}
+
       - name: Run Python script
         run: poetry run python main.py create
         env:
           OVH_ENDPOINT: ${{ vars.OVH_ENDPOINT }}
-          OVH_INSTANCE_FLAVOR_ID: ${{ inputs.ovhInstanceFlavorId }}
-          OVH_INSTANCE_IMAGE_ID: ${{ inputs.ovhInstanceImageId }}
+          OVH_INSTANCE_FLAVOR_ID: ${{ env.OVH_INSTANCE_FLAVOR_ID }}
+          OVH_INSTANCE_IMAGE_ID: ${{ env.OVH_INSTANCE_IMAGE_ID }}
           OVH_REGION: ${{ inputs.ovhInstanceRegion }}
           
           USERS: ${{ vars.USERS }}
