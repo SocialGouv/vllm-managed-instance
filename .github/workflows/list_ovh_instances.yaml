@@ -1,0 +1,38 @@
+name: List OVH Instance Flavors and Images
+
+on:
+  workflow_dispatch:
+
+jobs:
+  list-ovh-instances:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ovh
+
+      - name: Run OVH API script
+        env:
+          OVH_ENDPOINT: ${{ secrets.OVH_ENDPOINT }}
+          OVH_APPLICATION_KEY: ${{ secrets.OVH_APPLICATION_KEY }}
+          OVH_APPLICATION_SECRET: ${{ secrets.OVH_APPLICATION_SECRET }}
+          OVH_CONSUMER_KEY: ${{ secrets.OVH_CONSUMER_KEY }}
+        run: |
+          echo "::group::OVH Instance Flavors and Images"
+          python ovh_instance_list.py
+          echo "::endgroup::"
+
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: ovh-instance-list
+          path: ovh_instance_list.json
