@@ -34,28 +34,29 @@ def initialize_ovh_client():
 def get_regions(client, service_name):
     try:
         regions = client.get(f'/cloud/project/{service_name}/region')
-        print(f"Retrieved {len(regions)} regions for service {service_name}")
-        return regions
+        gra_regions = [region for region in regions if region.startswith('GRA')]
+        print(f"Retrieved {len(gra_regions)} GRA regions for service {service_name}")
+        return gra_regions
     except Exception as e:
         print(f"Error fetching regions for service {service_name}: {str(e)}")
         return []
 
 def get_flavors(client, service_name, region):
     try:
-        flavors = client.get(f'/cloud/project/{service_name}/region/{region}/flavor')
+        flavors = client.get(f'/cloud/project/{service_name}/flavor', region=region)
         print(f"Retrieved {len(flavors)} flavors for service {service_name}, region {region}")
         return flavors
     except Exception as e:
         print(f"Error fetching flavors for service {service_name}, region {region}: {str(e)}")
         return []
 
-def get_images(client, service_name, region):
+def get_images(client, service_name, region, flavor_id):
     try:
-        images = client.get(f'/cloud/project/{service_name}/region/{region}/image')
-        print(f"Retrieved {len(images)} images for service {service_name}, region {region}")
+        images = client.get(f'/cloud/project/{service_name}/image', flavorType=flavor_id, osType='linux', region=region)
+        print(f"Retrieved {len(images)} images for service {service_name}, region {region}, flavor {flavor_id}")
         return images
     except Exception as e:
-        print(f"Error fetching images for service {service_name}, region {region}: {str(e)}")
+        print(f"Error fetching images for service {service_name}, region {region}, flavor {flavor_id}: {str(e)}")
         return []
 
 def main():
@@ -72,20 +73,23 @@ def main():
     regions = get_regions(client, service_name)
 
     if not regions:
-        print("No regions found. Please check your OVH account and ensure you have the necessary permissions.")
+        print("No GRA regions found. Please check your OVH account and ensure you have access to GRA regions.")
         return
 
     for region in regions:
         result[region] = {
             'flavors': [],
-            'images': []
+            'images': {}
         }
         
         flavors = get_flavors(client, service_name, region)
-        images = get_images(client, service_name, region)
         
-        result[region]['flavors'] = [flavor['id'] for flavor in flavors]
-        result[region]['images'] = [image['id'] for image in images]
+        for flavor in flavors:
+            flavor_id = flavor['id']
+            result[region]['flavors'].append(flavor_id)
+            
+            images = get_images(client, service_name, region, flavor_id)
+            result[region]['images'][flavor_id] = [image['id'] for image in images]
     
     # Write results to a JSON file
     with open('ovh_instance_list.json', 'w') as f:
