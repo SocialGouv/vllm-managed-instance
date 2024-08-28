@@ -26,7 +26,7 @@ jobs:
 
       - name: Run OVH API script
         env:
-          OVH_ENDPOINT: ${{ secrets.OVH_ENDPOINT }}
+          OVH_ENDPOINT: ${{ vars.OVH_ENDPOINT }}
           OVH_APPLICATION_KEY: ${{ secrets.OVH_APPLICATION_KEY }}
           OVH_APPLICATION_SECRET: ${{ secrets.OVH_APPLICATION_SECRET }}
           OVH_CONSUMER_KEY: ${{ secrets.OVH_CONSUMER_KEY }}
