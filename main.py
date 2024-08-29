@@ -51,7 +51,8 @@ authToken = getRequiredEnv("AUTH_TOKEN")
 huggingFaceHubToken = getRequiredEnv("HUGGING_FACE_HUB_TOKEN")
 s3AccessKeyId = getRequiredEnv("S3_ACCESS_KEY_ID")
 s3SecretAccessKey = getRequiredEnv("S3_SECRET_ACCESS_KEY")
-model = os.getenv("MODEL", "")
+s3ModelPath = getRequiredEnv("S3_MODEL_PATH")
+s3EndpointUrl = getRequiredEnv("S3_ENDPOINT_URL")
 users = os.getenv("USERS", "")
 
 if users:
@@ -115,9 +116,10 @@ write_files:
         echo "HOST=$(curl -4 ifconfig.me)" >> .env
         echo "CREDENTIALS='$(htpasswd -nBb user {authToken})'" >> .env
         echo "HUGGING_FACE_HUB_TOKEN='{huggingFaceHubToken}'" >> .env
-        echo "MODEL='{model}'" >> .env
+        echo "S3_MODEL_PATH='{s3ModelPath}'" >> .env
         echo "S3_ACCESS_KEY_ID='{s3AccessKeyId}'" >> .env
         echo "S3_SECRET_ACCESS_KEY='{s3SecretAccessKey}'" >> .env
+        echo "S3_ENDPOINT_URL='{s3EndpointUrl}'" >> .env
         
         # up docker compose services
         docker compose up -d --build
