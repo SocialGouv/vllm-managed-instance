@@ -28,7 +28,7 @@ services:
               count: all
               capabilities: [gpu]
     volumes:
-      - llm_service_volume:/app/models
+      - /opt/vllm/models:/app/models
     # healthcheck:
     #   test: curl --fail http://localhost:8000/v1/models || exit 1
     #   interval: 10s
