@@ -6,7 +6,7 @@ on:
       model:
         description: 'Model name to deploy'
         required: true
-        default: 'neuralmagic/Meta-Llama-3.1-70B-Instruct'
+        default: 'meta-llama/Llama-3.1-70B-Instruct'
       instanceNameSuffix:
         description: 'Instance name suffix'
         required: false
