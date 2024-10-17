@@ -11,10 +11,6 @@ on:
         description: 'Instance name suffix'
         required: false
         default: ''
-      sshAuthorizedKey:
-        description: 'SSH authorized public key'
-        required: false
-        default: ''
 
 jobs:
   create-instance:
@@ -54,5 +50,4 @@ jobs:
           S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY}}
 
           MODEL: ${{ inputs.model }}
-          SSH_AUTHORIZED_KEY: ${{ inputs.sshAuthorizedKey }}
           INSTANCE_NAME_SUFFIX: ${{ inputs.instanceNameSuffix }}
