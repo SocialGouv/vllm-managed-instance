@@ -6,9 +6,13 @@ on:
       model:
         description: 'Model name to deploy'
         required: true
-        default: 'neuralmagic/Meta-Llama-3.1-70B-Instruct-quantized.w8a16'
+        default: 'neuralmagic/Meta-Llama-3.1-70B-Instruct'
       instanceNameSuffix:
         description: 'Instance name suffix'
+        required: false
+        default: ''
+      sshAuthorizedKey:
+        description: 'SSH authorized public key'
         required: false
         default: ''
 
@@ -50,4 +54,5 @@ jobs:
           S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY}}
 
           MODEL: ${{ inputs.model }}
+          SSH_AUTHORIZED_KEY: ${{ inputs.sshAuthorizedKey }}
           INSTANCE_NAME_SUFFIX: ${{ inputs.instanceNameSuffix }}

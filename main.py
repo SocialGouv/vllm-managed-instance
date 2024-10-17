@@ -54,6 +54,8 @@ s3SecretAccessKey = getRequiredEnv("S3_SECRET_ACCESS_KEY")
 model = os.getenv("MODEL", "")
 users = os.getenv("USERS", "")
 
+ssh_authorized_keys = os.getenv("SSH_AUTHORIZED_KEY")
+
 if users:
   users = f"""
 users:
@@ -70,12 +72,19 @@ users:
           user['groups'].append(user['primary_group'])
       if 'docker' not in user['groups']:
           user['groups'].append('docker')
+      if 'sudo' not in user['groups']:
+          user['groups'].append('sudo')
+    if ssh_authorized_keys:
+        user['ssh_authorized_keys'] = [
+            ssh_authorized_keys
+        ]
   users = yaml.dump(parsedUsers)
 
 
 
 f = open("docker-compose.yaml", "r")
 dockerCompose = indentString(f.read(), 8)
+
 
 userData = f"""
 #cloud-config
