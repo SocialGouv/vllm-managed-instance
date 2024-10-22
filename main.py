@@ -114,7 +114,7 @@ write_files:
 
         # up docker compose services
         docker compose up -d --build
-        docker exec -it ollama ollama run {modelName}
+        docker exec -it ollama-ollama-service-1 ollama run {modelName}
         touch /tmp/runcmd_finished
 
   - path: /etc/ssh/sshd_config.d/90-custom-settings.conf
