@@ -112,6 +112,10 @@ write_files:
         echo "HOST=$(curl -4 ifconfig.me)" >> .env
         echo "CREDENTIALS='$(htpasswd -nBb user {authToken})'" >> .env
 
+        # Configure Docker to use Nvidia driver
+        nvidia-ctk runtime configure --runtime=docker
+        systemctl restart docker
+
         # up docker compose services
         docker compose up -d --build
         docker exec ollama-ollama-service-1 ollama run {modelName}

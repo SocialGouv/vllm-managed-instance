@@ -14,6 +14,8 @@ services:
       - "traefik.http.routers.ollama-service.middlewares=main-auth@docker"
     environment:
       VERBOSE: "${VERBOSE:-0}"
+    command:
+      - "--gpus=all"
     runtime: nvidia
     ipc: host
     deploy:
