@@ -71,3 +71,4 @@ jobs:
           OVH_SERVICE_NAME: ${{ secrets.OVH_SERVICE_NAME }}
           AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
           INSTANCE_NAME_SUFFIX: ${{ inputs.instanceNameSuffix }}
+          MODEL_NAME: ${{ inputs.modelName }}

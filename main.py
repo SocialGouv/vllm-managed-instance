@@ -49,6 +49,7 @@ imageId = getRequiredEnv("OVH_INSTANCE_IMAGE_ID")
 region = getRequiredEnv("OVH_REGION")
 authToken = getRequiredEnv("AUTH_TOKEN")
 users = os.getenv("USERS", "")
+modelName = getRequiredEnv("MODEL_NAME")
 
 if users:
   users = f"""
@@ -113,7 +114,7 @@ write_files:
 
         # up docker compose services
         docker compose up -d --build
-
+        docker exec -it ollama ollama run {modelName}
         touch /tmp/runcmd_finished
 
   - path: /etc/ssh/sshd_config.d/90-custom-settings.conf
