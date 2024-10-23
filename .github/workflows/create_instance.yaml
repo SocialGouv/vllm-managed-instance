@@ -14,7 +14,7 @@ on:
       ovhInstanceFlavorName:
         description: 'OVH GPU instance flavor name'
         required: true
-        default: 'l4-90'
+        default: 'l4-180'
       ovhInstanceImageName:
         description: 'OVH instance image name'
         required: true
