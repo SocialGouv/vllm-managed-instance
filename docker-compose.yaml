@@ -15,6 +15,7 @@ services:
       - "traefik.http.routers.ollama-service.middlewares=main-auth@docker"
       - "traefik.http.services.ollama-service.loadbalancer.server.port=11434"
     environment:
+      OLLAMA_KEEP_ALIVE: "-1"
       VERBOSE: "${VERBOSE:-0}"
     runtime: nvidia
     ipc: host
