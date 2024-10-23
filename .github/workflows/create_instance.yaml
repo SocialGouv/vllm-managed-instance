@@ -3,10 +3,10 @@ name: Create instance
 on:
   workflow_dispatch:
     inputs:
-      s3ModelPath:
-        description: 'The model to fetch from S3'
+      modelName:
+        description: 'The model to use'
         required: true
-        default: 'distilgpt2'
+        default: 'llama3.1:70b'
       instanceNameSuffix:
         description: 'Instance name suffix'
         required: false
@@ -70,9 +70,5 @@ jobs:
           OVH_SSH_KEY_ID: ${{ secrets.OVH_SSH_KEY_ID }}
           OVH_SERVICE_NAME: ${{ secrets.OVH_SERVICE_NAME }}
           AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
-          HUGGING_FACE_HUB_TOKEN: ${{ secrets.HUGGING_FACE_HUB_TOKEN }}
-          S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID}}
-          S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY}}
-          S3_ENDPOINT_URL: ${{ vars.S3_ENDPOINT_URL }}
-          S3_MODEL_PATH: ${{ inputs.s3ModelPath }}
           INSTANCE_NAME_SUFFIX: ${{ inputs.instanceNameSuffix }}
+          MODEL_NAME: ${{ inputs.modelName }}

@@ -41,19 +41,15 @@ instanceNameSuffix = os.getenv("INSTANCE_NAME_SUFFIX", "")
 if (instanceNameSuffix):
     instanceNameSuffix = f"-{instanceNameSuffix}"
 
-instanceName = "vllm-managed-instance" + instanceNameSuffix
+instanceName = "ollama-managed-instance" + instanceNameSuffix
 serviceName = getRequiredEnv("OVH_SERVICE_NAME")
 sshKeyId = getRequiredEnv("OVH_SSH_KEY_ID")
 flavorId = getRequiredEnv("OVH_INSTANCE_FLAVOR_ID")
 imageId = getRequiredEnv("OVH_INSTANCE_IMAGE_ID")
 region = getRequiredEnv("OVH_REGION")
 authToken = getRequiredEnv("AUTH_TOKEN")
-huggingFaceHubToken = getRequiredEnv("HUGGING_FACE_HUB_TOKEN")
-s3AccessKeyId = getRequiredEnv("S3_ACCESS_KEY_ID")
-s3SecretAccessKey = getRequiredEnv("S3_SECRET_ACCESS_KEY")
-s3ModelPath = getRequiredEnv("S3_MODEL_PATH")
-s3EndpointUrl = getRequiredEnv("S3_ENDPOINT_URL")
 users = os.getenv("USERS", "")
+modelName = getRequiredEnv("MODEL_NAME")
 
 if users:
   users = f"""
@@ -97,33 +93,32 @@ write_files:
     permissions: "0600"
     owner: ubuntu:ubuntu
     content: |
-  - path: /opt/vllm/init.sh
+  - path: /opt/ollama/init.sh
     owner: ubuntu:ubuntu
     permissions: "0775"
     content: |
         #!/bin/bash
 
         # init config
-        sudo mkdir -p /opt/vllm
+        sudo mkdir -p /opt/ollama
         sudo chown -R ubuntu:ubuntu /opt
         sudo chmod -R 0775 /opt
 
-        cd /opt/vllm
+        cd /opt/ollama
         cat <<'EOF' > docker-compose.yaml
 {dockerCompose}
         EOF
         echo "TOKEN={authToken}" >> .env
         echo "HOST=$(curl -4 ifconfig.me)" >> .env
         echo "CREDENTIALS='$(htpasswd -nBb user {authToken})'" >> .env
-        echo "HUGGING_FACE_HUB_TOKEN='{huggingFaceHubToken}'" >> .env
-        echo "S3_MODEL_PATH='{s3ModelPath}'" >> .env
-        echo "S3_ACCESS_KEY_ID='{s3AccessKeyId}'" >> .env
-        echo "S3_SECRET_ACCESS_KEY='{s3SecretAccessKey}'" >> .env
-        echo "S3_ENDPOINT_URL='{s3EndpointUrl}'" >> .env
-        
+
+        # Configure Docker to use Nvidia driver
+        nvidia-ctk runtime configure --runtime=docker
+        systemctl restart docker
+
         # up docker compose services
         docker compose up -d --build
-
+        docker exec ollama-ollama-service-1 ollama run {modelName}
         touch /tmp/runcmd_finished
 
   - path: /etc/ssh/sshd_config.d/90-custom-settings.conf
@@ -135,7 +130,7 @@ write_files:
       AllowGroups ubuntu
 
 runcmd:
-  - su - ubuntu -c '/opt/vllm/init.sh > /opt/vllm/init.log 2>&1'
+  - su - ubuntu -c '/opt/ollama/init.sh > /opt/ollama/init.log 2>&1'
 
 {users}
 """
@@ -225,27 +220,6 @@ if action == "create":
         logger.error("Error finding IP in instance response")
         sys.exit(1)
     logger.info(f"Instance domain: {ip}.nip.io")
-
-    # url = f"https://{ip}.nip.io/v1/models"
-    # max_attempts = 120
-    # wait_time = 5
-    # attempt = 1
-    # while attempt <= max_attempts:
-    #     try:
-    #         response = requests.get(url)
-    #         if response.status_code == 401:
-    #             logger.info(f"URL {url} is ready.")
-    #             break
-    #     except requests.ConnectionError:
-    #         pass
-    #     logger.info(f"Attempt {attempt}/{max_attempts}: URL not ready (HTTP status code: {response.status_code if 'response' in locals() else 'Connection error'}). Waiting {wait_time} seconds...")
-    #     time.sleep(wait_time)
-    #     attempt += 1
-    # else:
-    #     logger.info("URL is not ready after maximum attempts.")
-    #     sys.exit(1)
-
-
 
 elif action == "delete":
     instanceId = findInstance()

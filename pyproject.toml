@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "vllm-managed-instance"
+name = "ollama-managed-instance"
 version = "0.1.0"
 description = ""
 authors = ["Matéo Mévollon <m.mevollon@proton.me>"]
