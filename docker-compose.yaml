@@ -2,16 +2,18 @@ services:
   ollama-service:
     restart: always
     image: ollama/ollama
+    tty: true
     expose:
-      - "8000"
-    ports:
-      - "0.0.0.0:8000:11434"
+      - "11434"
+    # ports:
+    #   - "0.0.0.0:11434:11434"
     labels:
       - "traefik.http.routers.ollama-service.rule=Host(`${HOST}.nip.io`)"
       - "traefik.http.routers.ollama-service.entrypoints=websecure"
       - "traefik.http.routers.ollama-service.tls.certresolver=myresolver"
       - "traefik.http.middlewares.main-auth.basicauth.users=${CREDENTIALS}"
       - "traefik.http.routers.ollama-service.middlewares=main-auth@docker"
+      - "traefik.http.services.ollama-service.loadbalancer.server.port=11434"
     environment:
       VERBOSE: "${VERBOSE:-0}"
     runtime: nvidia
