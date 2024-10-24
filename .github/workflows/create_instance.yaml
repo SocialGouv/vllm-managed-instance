@@ -6,7 +6,7 @@ on:
       modelName:
         description: 'The model to use'
         required: true
-        default: 'llama3.1:70b'
+        default: 'llama3.1'
       instanceNameSuffix:
         description: 'Instance name suffix'
         required: false
