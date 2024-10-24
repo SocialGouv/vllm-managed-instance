@@ -12,7 +12,7 @@ on:
         required: false
         default: ''
       ovhInstanceFlavorName:
-        description: 'OVH GPU instance flavor name'
+        description: 'OVH GPU instance flavor name (x2 GPUs)'
         required: true
         default: 'l4-180'
       ovhInstanceImageName:
