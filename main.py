@@ -99,7 +99,7 @@ write_files:
     owner: ubuntu:ubuntu
     permissions: "0775"
     content: |
-        #!/bin/bash
+        #!/usr/bin/env bash
 
         # init config
         sudo mkdir -p /opt/ollama
