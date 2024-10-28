@@ -50,6 +50,8 @@ region = getRequiredEnv("OVH_REGION")
 authToken = getRequiredEnv("AUTH_TOKEN")
 users = os.getenv("USERS", "")
 modelName = getRequiredEnv("MODEL_NAME")
+serviceReplicas = getRequiredEnv("SERVICE_REPLICAS")
+gpuByReplica = getRequiredEnv("GPU_BY_REPLICA")
 
 if users:
   users = f"""
@@ -71,7 +73,7 @@ users:
 
 
 
-f = open("docker-compose.yaml", "r")
+f = open("templates/docker-compose.tpl", "r")
 dockerCompose = indentString(f.read(), 8)
 
 userData = f"""
@@ -105,9 +107,30 @@ write_files:
         sudo chmod -R 0775 /opt
 
         cd /opt/ollama
-        cat <<'EOF' > docker-compose.yaml
+        cat <<'EOF' > docker-compose.tpl
 {dockerCompose}
         EOF
+        
+        # install gomplate
+        mkdir -p ~/bin
+        curl -L https://github.com/hairyhenderson/gomplate/releases/download/v3.9.0/gomplate_linux-amd64 \
+        -o ~/bin/gomplate
+        chmod +x ~/bin/gomplate
+        echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc
+        source ~/.bashrc
+
+        # generate docker compose
+        export HOST_GPU_COUNT=$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)
+        export SERVICE_REPLICAS={serviceReplicas}
+        if [ -z $SERVICE_REPLICAS ]; then
+          export SERVICE_REPLICAS=$HOST_GPU_COUNT
+        fi
+        export GPU_BY_REPLICA={gpuByReplica}
+        if [ -z $GPU_BY_REPLICA ]; then
+          export GPU_BY_REPLICA=$HOST_GPU_COUNT
+        fi
+        cat docker-compose.tpl | gomplate -o docker-compose.yaml
+
         echo "TOKEN={authToken}" >> .env
         echo "HOST=$(curl -4 ifconfig.me)" >> .env
         echo "CREDENTIALS='$(htpasswd -nBb user {authToken})'" >> .env
@@ -117,9 +140,9 @@ write_files:
         systemctl restart docker
 
         # up docker compose services
+        docker swarm init
         docker compose up -d --build
-        docker exec ollama-ollama-service-1-1 ollama pull {modelName}
-        docker exec ollama-ollama-service-2-1 ollama pull {modelName}
+        docker exec ollama-ollama-service-1-1 ollama run {modelName}
         touch /tmp/runcmd_finished
 
   - path: /etc/ssh/sshd_config.d/90-custom-settings.conf
