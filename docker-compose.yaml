@@ -60,6 +60,7 @@ services:
       - ollama-network
 
   nvidia-monitor:
+    privileged: true
     build: ./nvidia-monitor
     restart: always
     expose:
@@ -74,6 +75,9 @@ services:
       - "traefik.http.services.nvidia-monitor.loadbalancer.server.port=5000"
     volumes:
       - "/usr/bin/nvidia-smi:/usr/bin/nvidia-smi:ro"
+    devices:
+      - "/dev/nvidia0:/dev/nvidia0"
+      - "/dev/nvidia1:/dev/nvidia1"
     networks:
       - ollama-network
 
