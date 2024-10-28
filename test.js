@@ -1,7 +1,19 @@
 import http from "k6/http";
 import { check } from "k6";
 
-export const options = { vus: 4, iterations: 40 };
+// export const options = { vus: 4, iterations: 40 };
+
+export const options = {
+  scenarios: {
+    parallel_requests: {
+      executor: 'constant-vus',  // Type d'exécuteur qui maintient un nombre constant de VUs
+      // iterations: 40,
+      vus: 8,                    // Nombre d'utilisateurs virtuels en parallèle
+      duration: '180s',           // Durée du test
+      // maxVUs: '40',         // Durée maximale incluant les timeouts
+    },
+  },
+};
 
 const url = `https://${__ENV.HOST_IP}.nip.io/api/generate`;
 
