@@ -121,11 +121,11 @@ write_files:
         # generate docker compose
         export HOST_GPU_COUNT=$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)
         export SERVICE_REPLICAS={serviceReplicas}
-        if [ -z $SERVICE_REPLICAS ]; then
+        if [ -z "$SERVICE_REPLICAS" ]; then
           export SERVICE_REPLICAS=$HOST_GPU_COUNT
         fi
         export GPU_BY_REPLICA={gpuByReplica}
-        if [ -z $GPU_BY_REPLICA ]; then
+        if [ -z "$GPU_BY_REPLICA" ]; then
           export GPU_BY_REPLICA=$HOST_GPU_COUNT
         fi
         cat docker-compose.tpl | gomplate > docker-compose.yaml
