@@ -137,8 +137,8 @@ write_files:
         echo "SERVICE_REPLICAS=$SERVICE_REPLICAS" >> .env
 
         # Configure Docker to use Nvidia driver
-        nvidia-ctk runtime configure --runtime=docker
-        systemctl restart docker
+        sudo nvidia-ctk runtime configure --runtime=docker
+        sudo systemctl restart docker
 
         # up docker compose services
         docker compose up -d --build
