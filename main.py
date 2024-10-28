@@ -128,7 +128,7 @@ write_files:
         if [ -z $GPU_BY_REPLICA ]; then
           export GPU_BY_REPLICA=$HOST_GPU_COUNT
         fi
-        cat docker-compose.tpl | gomplate -o docker-compose.yaml
+        cat docker-compose.tpl | gomplate > docker-compose.yaml
 
         echo "TOKEN={authToken}" >> .env
         echo "HOST=$(curl -4 ifconfig.me)" >> .env
