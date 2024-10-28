@@ -118,6 +118,9 @@ write_files:
         echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc
         source ~/.bashrc
 
+        # debug
+        env > all.env
+
         # generate docker compose
         export HOST_GPU_COUNT=$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)
         export SERVICE_REPLICAS={serviceReplicas}
