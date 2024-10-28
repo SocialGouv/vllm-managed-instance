@@ -50,8 +50,8 @@ region = getRequiredEnv("OVH_REGION")
 authToken = getRequiredEnv("AUTH_TOKEN")
 users = os.getenv("USERS", "")
 modelName = getRequiredEnv("MODEL_NAME")
-serviceReplicas = getRequiredEnv("SERVICE_REPLICAS")
-gpuByReplica = getRequiredEnv("GPU_BY_REPLICA")
+serviceReplicas = os.getenv("SERVICE_REPLICAS", "")
+gpuByReplica = os.getenv("GPU_BY_REPLICA", "")
 
 if users:
   users = f"""
