@@ -140,7 +140,6 @@ write_files:
         systemctl restart docker
 
         # up docker compose services
-        docker swarm init
         docker compose up -d --build
         docker exec ollama-ollama-service-1-1 ollama run {modelName}
         touch /tmp/runcmd_finished
