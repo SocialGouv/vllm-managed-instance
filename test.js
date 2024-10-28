@@ -28,7 +28,7 @@ export default function () {
   const randomIndex = Math.floor(Math.random() * prompts.length);
   const prompt = prompts[randomIndex];
 
-  const payload = JSON.stringify({ prompt, model: "llama3.1" });
+  const payload = JSON.stringify({ prompt, model: __ENV.MODEL_NAME });
   const response = http.post(url, payload, params);
 
   check(response, {
