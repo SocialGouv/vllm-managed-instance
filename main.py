@@ -133,6 +133,8 @@ write_files:
         echo "TOKEN={authToken}" >> .env
         echo "HOST=$(curl -4 ifconfig.me)" >> .env
         echo "CREDENTIALS='$(htpasswd -nBb user {authToken})'" >> .env
+        echo "GPU_BY_REPLICA=$GPU_BY_REPLICA" >> .env
+        echo "SERVICE_REPLICAS=$SERVICE_REPLICAS" >> .env
 
         # Configure Docker to use Nvidia driver
         nvidia-ctk runtime configure --runtime=docker
