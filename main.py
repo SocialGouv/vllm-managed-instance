@@ -116,11 +116,8 @@ write_files:
         curl -L https://github.com/hairyhenderson/gomplate/releases/download/v3.9.0/gomplate_linux-amd64 -o ~/bin/gomplate
         chmod +x ~/bin/gomplate
         echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc
-        # source ~/.bashrc
+        # source ~/.bashrc # this doesn't work for some unidentified reason
         export PATH="$HOME/bin:$PATH"
-
-        # debug
-        env > all.env
 
         # generate docker compose
         export HOST_GPU_COUNT=$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)
