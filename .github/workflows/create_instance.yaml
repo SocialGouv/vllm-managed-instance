@@ -6,7 +6,7 @@ on:
       modelName:
         description: 'The model to use'
         required: true
-        default: 'llama3.1:70b'
+        default: 'llama3.1'
       instanceNameSuffix:
         description: 'Instance name suffix'
         required: false
@@ -14,7 +14,7 @@ on:
       ovhInstanceFlavorName:
         description: 'OVH GPU instance flavor name'
         required: true
-        default: 'l4-90'
+        default: 'l4-180'
       ovhInstanceImageName:
         description: 'OVH instance image name'
         required: true
@@ -23,6 +23,14 @@ on:
         description: 'OVH instance region'
         required: true
         default: 'GRA11'
+      serviceReplicas:
+        description: 'Replicas (number of gpu by default)'
+        required: false
+        default: ''
+      gpuByReplica:
+        description: 'GPU by replica (leave empty to use all gpu by replica)'
+        required: false
+        default: '1'
 
 jobs:
   create-instance:
@@ -72,3 +80,6 @@ jobs:
           AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
           INSTANCE_NAME_SUFFIX: ${{ inputs.instanceNameSuffix }}
           MODEL_NAME: ${{ inputs.modelName }}
+          
+          SERVICE_REPLICAS: ${{ inputs.serviceReplicas }}
+          GPU_BY_REPLICA: ${{ inputs.gpuByReplica }}
