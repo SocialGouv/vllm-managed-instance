@@ -141,6 +141,27 @@ write_files:
         sudo nvidia-ctk runtime configure --runtime=docker
         sudo systemctl restart docker
 
+        # Wait for Nvidia GPUs to be ready
+        MAX_RETRIES=30
+        RETRY_DELAY=5
+        COUNTER=0
+
+        while [ $COUNTER -lt $MAX_RETRIES ]; do
+        if nvidia-smi > /dev/null 2>&1; then
+            echo "NVIDIA GPU is available."
+            break
+        else
+            echo "Waiting for NVIDIA GPU to become available..."
+            sleep $RETRY_DELAY
+            COUNTER=$((COUNTER + 1))
+        fi
+        done
+
+        if [ $COUNTER -eq $MAX_RETRIES ]; then
+        echo "NVIDIA GPU did not become available in time."
+        exit 1
+        fi
+
         # up docker compose services
         docker compose up -d --build
         docker exec ollama-ollama-service-1-1 ollama run {modelName}
