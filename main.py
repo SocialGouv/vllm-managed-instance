@@ -137,10 +137,6 @@ write_files:
         echo "GPU_BY_REPLICA=$GPU_BY_REPLICA" >> .env
         echo "SERVICE_REPLICAS=$SERVICE_REPLICAS" >> .env
 
-        # Configure Docker to use Nvidia driver
-        sudo nvidia-ctk runtime configure --runtime=docker
-        sudo systemctl restart docker
-
         # Wait for Nvidia GPUs to be ready
         MAX_RETRIES=30
         RETRY_DELAY=5
@@ -161,6 +157,10 @@ write_files:
         echo "NVIDIA GPU did not become available in time."
         exit 1
         fi
+
+        # Configure Docker to use Nvidia driver
+        sudo nvidia-ctk runtime configure --runtime=docker
+        sudo systemctl restart docker
 
         # up docker compose services
         docker compose up -d --build
