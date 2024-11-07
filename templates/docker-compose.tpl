@@ -41,8 +41,8 @@ services:
               device_ids: [{{ $gpuListQuoted }}]
               capabilities: [gpu]
     volumes:
-      # - "./.ollama-service-{{ add $i 1 }}:/root/.ollama"
-      - "./.ollama-service:/root/.ollama"
+      - "./.ollama-service-{{ add $i 1 }}:/root/.ollama"
+      # - "./.ollama-service:/root/.ollama"
     networks:
       - ollama-network
   {{- end }}

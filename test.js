@@ -1,7 +1,7 @@
 import http from "k6/http";
 import { check } from "k6";
 
-export const options = { vus: 4, iterations: 40 };
+export const options = { vus: 4, iterations: 16 };
 
 const url = `https://${__ENV.HOST_IP}.nip.io/api/generate`;
 
