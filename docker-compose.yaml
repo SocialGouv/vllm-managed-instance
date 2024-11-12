@@ -15,7 +15,7 @@ services:
       - "traefik.http.services.ollama-service.loadbalancer.server.port=11434"
     environment:
       OLLAMA_KEEP_ALIVE: "-1"
-      CUDA_VISIBLE_DEVICES: "2"
+      # CUDA_VISIBLE_DEVICES: "2"
       # NVIDIA_VISIBLE_DEVICES: "0"
     runtime: nvidia
     ipc: host
@@ -24,43 +24,43 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              # device_ids: ['0']
-              count: all
+              device_ids: ['0']
+              # count: all
               capabilities: [gpu]
     volumes:
       - "./.ollama-service-1:/root/.ollama"
     networks:
       - ollama-network
 
-  # ollama-service-2:
-  #   restart: always
-  #   image: ollama/ollama
-  #   tty: true
-  #   expose:
-  #     - "11434"
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.ollama-service.rule=Host(`${HOST}.nip.io`)"
-  #     - "traefik.http.routers.ollama-service.entrypoints=websecure"
-  #     - "traefik.http.routers.ollama-service.tls.certresolver=myresolver"
-  #     - "traefik.http.middlewares.main-auth.basicauth.users=${CREDENTIALS}"
-  #     - "traefik.http.routers.ollama-service.middlewares=main-auth@docker"
-  #     - "traefik.http.services.ollama-service.loadbalancer.server.port=11434"
-  #   environment:
-  #     OLLAMA_KEEP_ALIVE: "-1"
-  #   runtime: nvidia
-  #   ipc: host
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             device_ids: ['1']
-  #             capabilities: [gpu]
-  #   volumes:
-  #     - "./.ollama-service-2:/root/.ollama"
-  #   networks:
-  #     - ollama-network
+  ollama-service-2:
+    restart: always
+    image: ollama/ollama
+    tty: true
+    expose:
+      - "11434"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ollama-service.rule=Host(`${HOST}.nip.io`)"
+      - "traefik.http.routers.ollama-service.entrypoints=websecure"
+      - "traefik.http.routers.ollama-service.tls.certresolver=myresolver"
+      - "traefik.http.middlewares.main-auth.basicauth.users=${CREDENTIALS}"
+      - "traefik.http.routers.ollama-service.middlewares=main-auth@docker"
+      - "traefik.http.services.ollama-service.loadbalancer.server.port=11434"
+    environment:
+      OLLAMA_KEEP_ALIVE: "-1"
+    runtime: nvidia
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['1']
+              capabilities: [gpu]
+    volumes:
+      - "./.ollama-service-2:/root/.ollama"
+    networks:
+      - ollama-network
 
   reverse-proxy:
     image: traefik:v3.2
