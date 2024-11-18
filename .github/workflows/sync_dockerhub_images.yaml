@@ -1,0 +1,57 @@
+name: Sync DockerHub images to GHCR
+
+on:
+  workflow_dispatch:  # Permet de lancer manuellement
+  schedule:
+    - cron: '0 0 * * 0'  # Exécution hebdomadaire le dimanche à minuit
+
+jobs:
+  sync-images:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      #- name: Login to DockerHub
+      #  uses: docker/login-action@v3
+      #  with:
+      #    username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #    password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sync Images
+        env:
+          IMAGES: |
+            ollama/ollama
+            traefik:v3.2
+        run: |
+          # Lecture de la liste des images
+          echo "$IMAGES" | while read image; do
+            if [ ! -z "$image" ]; then
+              echo "Processing $image"
+              
+              # Pull de l'image depuis DockerHub
+              docker pull "$image"
+              
+              # Préparation du nom pour GHCR
+              GHCR_IMAGE="ghcr.io/${GITHUB_REPOSITORY}/${image}"
+              
+              # Tag pour GHCR
+              docker tag "$image" "$GHCR_IMAGE"
+              
+              # Push vers GHCR
+              docker push "$GHCR_IMAGE"
+              
+              echo "Successfully synced $image to $GHCR_IMAGE"
+            fi
+          done
