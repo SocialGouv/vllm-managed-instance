@@ -137,6 +137,9 @@ write_files:
         echo "GPU_BY_REPLICA=$GPU_BY_REPLICA" >> .env
         echo "SERVICE_REPLICAS=$SERVICE_REPLICAS" >> .env
 
+        # see https://stackoverflow.com/a/50428496
+        sudo nvidia-smi -pm 1
+        
         # Configure Docker to use Nvidia driver
         sudo nvidia-ctk runtime configure --runtime=docker
         sudo systemctl restart docker
