@@ -29,8 +29,6 @@ services:
       - "traefik.http.services.ollama-service.loadbalancer.server.port=11434"
     environment:
       OLLAMA_KEEP_ALIVE: "-1"
-      NVIDIA_VISIBLE_DEVICES: "{{ $gpuList }}"
-      CUDA_VISIBLE_DEVICES: "{{ $gpuList }}"
     runtime: nvidia
     ipc: host
     deploy:
