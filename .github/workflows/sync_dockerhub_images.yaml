@@ -44,7 +44,7 @@ jobs:
               docker pull "$image"
               
               # Préparation du nom pour GHCR
-              GHCR_IMAGE="ghcr.io/${GITHUB_REPOSITORY}/${image}"
+              GHCR_IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}/${image}"
               
               # Tag pour GHCR
               docker tag "$image" "$GHCR_IMAGE"
