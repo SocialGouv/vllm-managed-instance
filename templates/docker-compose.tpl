@@ -15,7 +15,7 @@ services:
   {{- end }}
   ollama-service-{{ add $i 1 }}:
     restart: always
-    image: ollama/ollama
+    image: ghcr.io/socialgouv/vllm-managed-instance/ollama/ollama:latest
     tty: true
     expose:
       - "11434"
@@ -48,7 +48,7 @@ services:
 
 
   reverse-proxy:
-    image: traefik:v3.2
+    image: ghcr.io/socialgouv/vllm-managed-instance/traefik:v3.2
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
