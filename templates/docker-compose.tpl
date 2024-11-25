@@ -13,6 +13,8 @@ services:
       {{- $gpuListQuoted = printf "%s,'%v'" $gpuListQuoted $gpu }}
     {{- end }}
   {{- end }}
+  {{- $gpuListZeroIndexedSeq := seq 0 (sub $gpuByReplica 1) -}}
+  {{- $gpuListZeroIndexed := join $gpuListZeroIndexedSeq "," -}}
   ollama-service-{{ add $i 1 }}:
     restart: always
     image: ghcr.io/socialgouv/vllm-managed-instance/ollama/ollama:latest
@@ -29,6 +31,8 @@ services:
       - "traefik.http.services.ollama-service.loadbalancer.server.port=11434"
     environment:
       OLLAMA_KEEP_ALIVE: "-1"
+      NVIDIA_VISIBLE_DEVICES: "{{ $gpuListZeroIndexed }}"
+      CUDA_VISIBLE_DEVICES: "{{ $gpuListZeroIndexed }}"
     runtime: nvidia
     ipc: host
     deploy:
@@ -44,8 +48,6 @@ services:
     networks:
       - ollama-network
   {{- end }}
-
-
 
   reverse-proxy:
     image: ghcr.io/socialgouv/vllm-managed-instance/traefik:v3.2
