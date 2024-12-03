@@ -13,8 +13,8 @@ services:
       {{- $gpuListQuoted = printf "%s,'%v'" $gpuListQuoted $gpu }}
     {{- end }}
   {{- end }}
-  {{- $gpuListZeroIndexedSeq := seq 0 (sub $gpuByReplica 1) -}}
-  {{- $gpuListZeroIndexed := join $gpuListZeroIndexedSeq "," -}}
+  {{- $gpuListZeroIndexedSeq := seq 0 (sub $gpuByReplica 1) }}
+  {{- $gpuListZeroIndexed := join $gpuListZeroIndexedSeq "," }}
   ollama-service-{{ add $i 1 }}:
     restart: always
     image: ghcr.io/socialgouv/vllm-managed-instance/ollama/ollama:latest
