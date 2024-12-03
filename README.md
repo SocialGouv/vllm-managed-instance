@@ -24,3 +24,12 @@ poetry run python main.py
 ## resources
 
 - https://cloudinit.readthedocs.io/en/latest/howto/debugging.html
+
+## generate docker-compose template
+
+install gomplate: https://docs.gomplate.ca/installing/
+```sh
+export SERVICE_REPLICAS=2
+export GPU_BY_REPLICA=1
+cat templates/docker-compose.tpl | gomplate > docker-compose.yaml
+```
